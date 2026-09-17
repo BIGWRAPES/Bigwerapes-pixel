@@ -1,0 +1,566 @@
+<?php
+/**
+ * Admin Panel - Add Business Profile
+ * Simple interface to create new business owner profiles
+ */
+
+// Check if user has admin access (simple check - should be enhanced)
+// For now, we'll display the form openly during setup
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Add Business Profile | Bigwrapes-Pixel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --accent-color: #008870;
+            --dark-bg: #0f0f12;
+            --surface-color: #1f1f23;
+            --border-color: #2a2a2f;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-container {
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .admin-header {
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .form-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h3 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            background-color: #2a2a2f;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            background-color: #2a2a2f;
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 136, 112, 0.15);
+        }
+        
+        .form-select {
+            background-color: #2a2a2f;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .form-select:focus {
+            border-color: var(--accent-color);
+            background-color: #2a2a2f;
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 136, 112, 0.15);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .required-indicator {
+            color: #ff6b6b;
+            margin-left: 0.25rem;
+        }
+        
+        .btn-submit {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-submit:hover {
+            background-color: #006b54;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 136, 112, 0.3);
+        }
+        
+        .btn-reset {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+        
+        .btn-reset:hover {
+            background-color: var(--surface-color);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 2rem;
+        }
+        
+        .alert-success {
+            background-color: rgba(0, 200, 136, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .alert-danger {
+            background-color: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+        }
+        
+        .alert-info {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            display: none;
+            padding: 1rem;
+            background-color: rgba(0, 200, 136, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-container {
+                padding: 1rem;
+            }
+            
+            .form-card {
+                padding: 1.5rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn-reset {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="bi bi-shop"></i> Add Business Profile</h1>
+            <p>Create a new business owner profile with all necessary details</p>
+        </div>
+        
+        <div class="form-card">
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message">
+                <i class="bi bi-check-circle"></i>
+                <strong>Success!</strong> Business profile created successfully.
+                <div style="margin-top: 0.5rem; font-size: 0.9rem;" id="successDetails"></div>
+            </div>
+            
+            <!-- Error Message -->
+            <div id="errorMessage" class="alert alert-danger" style="display: none;">
+                <strong>Error!</strong> <span id="errorText"></span>
+            </div>
+            
+            <form id="businessForm">
+                <!-- User Selection -->
+                <div class="form-section">
+                    <h3>Admin</h3>
+                    <div class="form-group">
+                        <label class="form-label">
+                            User/ information <span class="required-indicator">*</span>
+                        </label>
+                        <select id="userId" name="user_id" class="form-select" required>
+                            <option value="">-- Select or Create New User --</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                            <i class="bi bi-info-circle"></i> Create user account first if owner doesn't exist
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Business Information -->
+                <div class="form-section">
+                    <h3>Business Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                             Business name <span class="required-indicator">*</span>
+                            </label>
+                            <input type="text" id="businessName" name="business_name" class="form-control" 
+                                   placeholder="e.g., ADMIN Digital Services" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                               Business Category <span class="required-indicator">*</span>
+                            </label>
+                            <select id="category" name="category" class="form-select" required>
+                                <option value="">-- Select Category --</option>
+                                <option value="technology">Technology</option>
+                                <option value="consulting">Consulting</option>
+                                <option value="education">Education</option>
+                                <option value="design">Design & Creative</option>
+                                <option value="marketing">Marketing & Advertising</option>
+                                <option value="ecommerce">E-Commerce</option>
+                                <option value="services">Business Services</option>
+                                <option value="hospitality">Hospitality</option>
+                                <option value="health">Fashion and Accessories</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Business Description</label>
+                        <textarea id="description" name="description" class="form-control" 
+                                  placeholder="Describe what your business does..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Logo URL</label>
+                            <input type="url" id="logoUrl" name="logo_url" class="form-control" 
+                                   placeholder="https://example.com/logo.png">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cover Image URL</label>
+                            <input type="url" id="coverImageUrl" name="cover_image_url" class="form-control" 
+                                   placeholder="https://example.com/cover.jpg">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Owner Information -->
+                <div class="form-section">
+                    <h3>Owner Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Owner Name <span class="required-indicator">*</span>
+                            </label>
+                            <input type="text" id="ownerName" name="owner_name" class="form-control" 
+                                   placeholder="e.g., Administrator" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Owner Avatar URL</label>
+                            <input type="url" id="ownerAvatarUrl" name="owner_avatar_url" class="form-control" 
+                                   placeholder="https://example.com/avatar.jpg">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Owner Bio</label>
+                        <textarea id="ownerBio" name="owner_bio" class="form-control" 
+                                  placeholder="Brief bio about the owner..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" 
+                                   placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                WhatsApp Number <span class="required-indicator">*</span>
+                            </label>
+                            <input type="tel" id="whatsappNumber" name="whatsapp_number" class="form-control" 
+                                   placeholder="+234 813 123 4567" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   placeholder="admin@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Website URL</label>
+                            <input type="url" id="websiteUrl" name="website_url" class="form-control" 
+                                   placeholder="https://example.com">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location Information -->
+                <div class="form-section">
+                    <h3>Location</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Location/Address</label>
+                            <input type="text" id="location" name="location" class="form-control" 
+                                   placeholder="Street address">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" id="city" name="city" class="form-control" 
+                                   placeholder="City">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">State/Province</label>
+                            <input type="text" id="state" name="state" class="form-control" 
+                                   placeholder="State">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" id="country" name="country" class="form-control" 
+                                   placeholder="Country">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="button-group">
+                    <button type="submit" class="btn-submit">
+                        <span class="loading-spinner" id="loadingSpinner"></span>
+                        <i class="bi bi-plus-circle"></i>
+                        <span id="submitText">Create Business Profile</span>
+                    </button>
+                    <button type="reset" class="btn-reset">
+                        <i class="bi bi-arrow-counterclockwise"></i> Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load available users
+        async function loadUsers() {
+            try {
+                // For now, create a default ADMIN user if it doesn't exist
+                const response = await fetch('/nexa/api/get_or_create_admin.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'get_or_create_admin'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const userSelect = document.getElementById('userId');
+                    const option = document.createElement('option');
+                    option.value = data.user_id;
+                    option.textContent = data.user_name || 'Admin User';
+                    option.selected = true;
+                    userSelect.appendChild(option);
+                    
+                    // Set owner name to Admin if not already set
+                    if (!document.getElementById('ownerName').value) {
+                        document.getElementById('ownerName').value = data.user_name || 'Administrator';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        // Form submission
+        document.getElementById('businessForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = document.querySelector('.btn-submit');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const submitText = document.getElementById('submitText');
+            
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'inline-block';
+            submitText.textContent = 'Creating...';
+            
+            // Hide error message
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').classList.remove('show');
+            
+            // Collect form data
+            const formData = new FormData(document.getElementById('businessForm'));
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/nexa/api/add_business.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Show success message
+                    const successMsg = document.getElementById('successMessage');
+                    const successDetails = document.getElementById('successDetails');
+                    successDetails.innerHTML = `
+                        Business ID: <strong>${result.business_id}</strong><br>
+                        Slug: <strong>${result.business_slug}</strong>
+                    `;
+                    successMsg.classList.add('show');
+                    
+                    // Reset form
+                    document.getElementById('businessForm').reset();
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Show error message
+                    const errorMsg = document.getElementById('errorMessage');
+                    const errorText = document.getElementById('errorText');
+                    errorText.textContent = result.message || result.error || 'Failed to create business';
+                    errorMsg.style.display = 'block';
+                    errorMsg.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                // Show error message
+                const errorMsg = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                errorText.textContent = error.message || 'An error occurred while creating the business';
+                errorMsg.style.display = 'block';
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                submitText.textContent = 'Create Business Profile';
+            }
+        });
+        
+        // Load users on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "business_name": "Pixel Threads",
+    "business_slug": "pixel-threads",
+    "description": "Fashion and accessories brand run by a student designer creating stylish everyday pieces with a personal touch.",
+    "category": "Fashion & Accessories",
+    "logo_url": "assets/img/portfolio/portfolio-3.webp",
+    "cover_image_url": "assets/img/about/wall45.jpg",
+    "owner_name": "Aisha Musa",
+    "owner_avatar_url": "assets/img/person/person-1.jpg",
+    "owner_bio": "Student fashion designer creating wearable pieces inspired by campus culture and everyday confidence.",
+    "phone": "+234 812 345 6789",
+    "whatsapp_number": "+2348123456789",
+    "whatsapp_link": "https://wa.me/2348123456789",
+    "email": "hello@pixelthreads.example",
+    "website_url": "https://example.com/pixelthreads",
+    "location": "Abuja, Nigeria",
+    "rating": 4.9,
+    "review_count": 24,
+    "is_verified": true,
+    "portfolio": [
+      { "title": "Campus Collection", "image": "assets/img/portfolio/portfolio-1.webp" },
+      { "title": "Weekend Capsule", "image": "assets/img/portfolio/portfolio-2.webp" }
+    ]
+  },
+  {
+    "id": 2,
+    "business_name": "Nexa Studio",
+    "business_slug": "nexa-studio",
+    "description": "Digital marketing and branding studio helping small businesses sharpen their online presence.",
+    "category": "Digital Services",
+    "logo_url": "assets/img/portfolio/portfolio-2.webp",
+    "cover_image_url": "assets/img/about/images.jpg",
+    "owner_name": "Daniel Okafor",
+    "owner_avatar_url": "assets/img/person/person-2.jpg",
+    "owner_bio": "Student entrepreneur focused on brand strategy, social media growth, and creative design systems.",
+    "phone": "+234 803 456 7890",
+    "whatsapp_number": "+2348034567890",
+    "whatsapp_link": "https://wa.me/2348034567890",
+    "email": "hello@nexastudio.example",
+    "website_url": "https://example.com/nexastudio",
+    "location": "Lagos, Nigeria",
+    "rating": 4.8,
+    "review_count": 18,
+    "is_verified": true,
+    "portfolio": [
+      { "title": "Brand Refresh", "image": "assets/img/portfolio/portfolio-4.webp" },
+      { "title": "Campaign Launch", "image": "assets/img/portfolio/portfolio-5.webp" }
+    ]
+  },
+  {
+    "id": 3,
+    "business_name": "Craft & Co.",
+    "business_slug": "craft-and-co",
+    "description": "Handmade home décor and custom gifts made by student artisans with a local touch.",
+    "category": "Crafts & Handmade",
+    "logo_url": "assets/img/portfolio/portfolio-4.webp",
+    "cover_image_url": "assets/img/about/wall45.jpg",
+    "owner_name": "Blessing Eze",
+    "owner_avatar_url": "assets/img/person/person-3.jpg",
+    "owner_bio": "Crafts maker blending creativity with eco-conscious design for everyday interiors and gifting.",
+    "phone": "+234 814 567 8901",
+    "whatsapp_number": "+2348145678901",
+    "whatsapp_link": "https://wa.me/2348145678901",
+    "email": "hello@craftandco.example",
+    "website_url": "https://example.com/craftandco",
+    "location": "Enugu, Nigeria",
+    "rating": 4.7,
+    "review_count": 15,
+    "is_verified": false,
+    "portfolio": [
+      { "title": "Gift Sets", "image": "assets/img/portfolio/portfolio-6.webp" },
+      { "title": "Home Decor", "image": "assets/img/portfolio/portfolio-7.webp" }
+    ]
+  }
+]
