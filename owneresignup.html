@@ -328,7 +328,7 @@
     <div class="signup-container">
         <div class="signup-card">
             <div class="signup-header">
-                <h1>Create interpreenures Account</h1>
+                <h1>Create Entrepreneur Account</h1>
                 <p>Join Bigwrapes-pixel and start exploring businesses</p>
             </div>
 
@@ -437,13 +437,14 @@
                 <button type="submit" class="signup-btn" id="signupBtn">Create Account</button>
 
                 <div class="login-link">
-                    Already have an account? <a href="log%20in%20form/form.html">Sign in</a>
+                    Already have an account? <a href="login.html">Sign in</a>
                 </div>
             </form>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="assets/js/supabase-client.js"></script>
     <script>
         // Form Elements
         const signupForm = document.getElementById('signupForm');
@@ -696,50 +697,23 @@
             signupBtn.textContent = '';
 
             try {
-                const response = await fetch('api/owner_signup.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        firstName: firstName,
-                        lastName: lastName,
-                        email: email,
-                        password: password
-                    })
+                const supabase = await window.supabaseReady;
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: new URL('login.html', window.location.href).href,
+                        data: { first_name: firstName, last_name: lastName, account_type: 'entrepreneur' }
+                    }
                 });
+                if (error) throw error;
 
-                // Try to parse as JSON first
-                const contentType = response.headers.get('content-type');
-                let data;
-                
-                if (contentType && contentType.includes('application/json')) {
-                    data = await response.json();
-                } else {
-                    // Response is not JSON (likely HTML error page)
-                    const text = await response.text();
-                    console.error('API returned non-JSON response:', text.substring(0, 200));
-                    showError('API Error: The server returned an invalid response. Check console for details.');
-                    signupBtn.disabled = false;
-                    signupBtn.classList.remove('loading');
-                    signupBtn.textContent = 'Create Account';
-                    return;
-                }
-
-                if (response.ok && data.success) {
-                    showSuccess('Account created successfully! Redirecting to login...');
-                    setTimeout(() => {
-                        window.location.href = 'log%20in%20form/businessowner.html';
-                    }, 1500);
-                } else {
-                    showError(data.message || `Error (${response.status}): Failed to create account. Please try again.`);
-                    signupBtn.disabled = false;
-                    signupBtn.classList.remove('loading');
-                    signupBtn.textContent = 'Create Account';
-                }
+                showSuccess('Account created. Check your email to confirm it, then sign in.');
+                signupBtn.disabled = false;
+                signupBtn.classList.remove('loading');
+                signupBtn.textContent = 'Create Account';
             } catch (error) {
                 console.error('Signup error:', error);
-                console.error('Error stack:', error.stack);
                 showError('An error occurred: ' + error.message + '. Please check your connection and try again.');
                 signupBtn.disabled = false;
                 signupBtn.classList.remove('loading');

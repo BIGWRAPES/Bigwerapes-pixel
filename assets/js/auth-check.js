@@ -7,12 +7,14 @@
  * Check if user is authenticated
  * @returns {boolean} True if user is logged in, false otherwise
  */
-function isUserAuthenticated() {
-    // Check for session or authentication token in localStorage
-    const authToken = localStorage.getItem('authToken');
-    const userEmail = localStorage.getItem('userEmail');
-    
-    return !!(authToken && userEmail);
+async function isUserAuthenticated() {
+    try {
+        const supabase = await window.supabaseReady;
+        const { data: { user } } = await supabase.auth.getUser();
+        return Boolean(user);
+    } catch {
+        return false;
+    }
 }
 
 /**
@@ -20,10 +22,10 @@ function isUserAuthenticated() {
  * @returns {Object} User object with email and timestamp
  */
 function getCurrentUser() {
-    return {
-        email: localStorage.getItem('userEmail'),
-        loginTime: localStorage.getItem('loginTime')
-    };
+    return window.supabaseReady.then(async (supabase) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        return user;
+    });
 }
 
 /**
@@ -101,7 +103,7 @@ function redirectToLogin(redirectUrl) {
     if (redirectUrl) {
         sessionStorage.setItem('redirectAfterLogin', redirectUrl);
     }
-    window.location.href = 'log%20in%20form/form.html';
+    window.location.href = 'login.html';
 }
 
 /**
@@ -116,7 +118,8 @@ function redirectToSignup() {
  * @param {string} loginMessage - Optional message to show on login form
  */
 function protectPage(loginMessage) {
-    if (!isUserAuthenticated()) {
+        isUserAuthenticated().then((authenticated) => {
+            if (authenticated) return;
         // Store message to show on login page
         if (loginMessage) {
             sessionStorage.setItem('loginMessage', loginMessage);
@@ -137,7 +140,7 @@ function protectPage(loginMessage) {
         // by fading it out
         document.body.style.pointerEvents = 'none';
         document.body.style.opacity = '0.5';
-    }
+    });
 }
 
 /**
@@ -145,21 +148,16 @@ function protectPage(loginMessage) {
  * @param {string} email - User email
  */
 function setAuthentication(email) {
-    const token = 'token_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('loginTime', new Date().toISOString());
+    console.warn('Supabase manages authentication sessions; do not set local auth tokens.', email);
 }
 
 /**
  * Logout user
  */
 function logoutUser() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('loginTime');
-    localStorage.removeItem('rememberEmail');
-    window.location.href = 'index.html';
+    window.supabaseReady
+        .then((supabase) => supabase.auth.signOut())
+        .finally(() => window.location.assign('index.html'));
 }
 
 /**

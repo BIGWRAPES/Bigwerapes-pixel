@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Your Business - Bigwrapes-Pixel</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; padding: 32px 16px; background: #101415; }
+    .business-panel { width: min(100%, 680px); margin: 0 auto; padding: 32px; background: var(--surface-color, #1b2222); border: 1px solid rgba(0, 136, 112, .3); border-radius: 12px; }
+    .business-panel h1 { color: var(--heading-color, #fff); font-size: 28px; }
+    .business-panel label { margin-top: 16px; color: var(--heading-color, #fff); }
+    .business-panel button { margin-top: 22px; }
+    #businessMessage { display: none; margin-top: 16px; }
+    .photo-preview-grid, .owned-business-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 14px; }
+    .photo-preview, .owned-product-photo { position: relative; min-width: 0; }
+    .photo-preview img, .owned-product-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+    .photo-preview button, .owned-product-photo button { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; padding: 0; margin: 0; }
+    .owned-business { padding: 22px 0; border-top: 1px solid rgba(255, 255, 255, .15); }
+  </style>
+  <script type="module" src="assets/js/supabase-client.js"></script>
+</head>
+<body>
+  <main class="business-panel">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+      <div><h1>Add your business</h1><p>Share your student business with the community.</p></div>
+      <button class="btn btn-outline-secondary" id="signOutButton" type="button">Sign out</button>
+    </div>
+    <div id="businessMessage" class="alert" role="status" aria-live="polite"></div>
+    <form id="businessForm">
+      <label class="form-label" for="businessName">Business name</label>
+      <input class="form-control" id="businessName" maxlength="120" required>
+      <label class="form-label" for="category">Category</label>
+      <select class="form-select" id="category" required>
+        <option value="">Choose a category</option>
+        <option>Fashion &amp; Accessories</option><option>Digital Services</option>
+        <option>Crafts &amp; Handmade</option><option>Photography &amp; Media</option>
+        <option>Food &amp; Hospitality</option><option>Education</option><option>Other</option>
+      </select>
+      <label class="form-label" for="description">Description</label>
+      <textarea class="form-control" id="description" rows="5" maxlength="2000" required></textarea>
+      <label class="form-label" for="businessImage">Business image</label>
+      <input class="form-control" id="businessImage" type="file" accept="image/jpeg,image/png,image/webp" required>
+      <div class="form-text">This is the business cover image. JPG, PNG, or WebP; maximum 5 MB.</div>
+      <label class="form-label" for="productImages">Product images</label>
+      <input class="form-control" id="productImages" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+      <div class="form-text" id="productImageCount">Select 1 to 15 product images. Each image can be up to 5 MB.</div>
+      <div id="productImagePreviews" class="photo-preview-grid" aria-live="polite"></div>
+      <button class="btn btn-primary" id="submitBusinessButton" type="submit">Upload and publish</button>
+    </form>
+    <section class="mt-5" aria-labelledby="yourBusinessesHeading">
+      <h2 id="yourBusinessesHeading" class="h4">Your businesses and product photos</h2>
+      <p class="form-text">You can add or remove individual product photos. Each business can have up to 15.</p>
+      <div id="ownedBusinesses"><p>Loading your businesses...</p></div>
+    </section>
+    <p class="mt-3 mb-0"><a href="businesses.html">Back to business directory</a></p>
+  </main>
+  <script type="module" src="assets/js/business-submit.js"></script>
+</body>
+</html>

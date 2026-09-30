@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In - Bigwrapes-Pixel</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #101415; }
+    .auth-panel { width: min(100%, 440px); padding: 36px; background: var(--surface-color, #1b2222); border: 1px solid rgba(0, 136, 112, .3); border-radius: 12px; }
+    .auth-panel h1 { margin-bottom: 8px; color: var(--heading-color, #fff); font-size: 28px; }
+    .auth-panel label { margin-top: 18px; color: var(--heading-color, #fff); }
+    .auth-panel button { margin-top: 22px; width: 100%; }
+    #authMessage { display: none; margin-top: 16px; }
+  </style>
+  <script type="module" src="assets/js/supabase-client.js"></script>
+</head>
+<body>
+  <main class="auth-panel">
+    <h1>Welcome back</h1>
+    <p>Sign in to manage your student business.</p>
+    <div id="authMessage" class="alert" role="status" aria-live="polite"></div>
+    <form id="loginForm">
+      <label class="form-label" for="email">Email address</label>
+      <input class="form-control" id="email" type="email" autocomplete="email" required>
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" id="password" type="password" autocomplete="current-password" required>
+      <button class="btn btn-primary" type="submit" id="loginButton">Sign In</button>
+    </form>
+    <form id="recoveryForm" hidden>
+      <label class="form-label" for="newPassword">New password</label>
+      <input class="form-control" id="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="btn btn-primary" type="submit">Update password</button>
+    </form>
+    <p class="mt-3 mb-1"><a href="forgot-password.html">Forgot your password?</a></p>
+    <p class="mb-0">New here? <a href="signup.html">Create a student account</a> or <a href="owneresignup.html">register as an entrepreneur</a>.</p>
+    <p class="mt-3 mb-0"><a href="index.html">Return to home</a></p>
+  </main>
+  <script type="module" src="assets/js/login.js"></script>
+</body>
+</html>

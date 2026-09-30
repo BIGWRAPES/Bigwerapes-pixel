@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <p style="font-size: 1.1rem; margin-bottom: 1rem;">No businesses found</p>
           </div>
         `;
+        container.dataset.staticLoaded = 'true';
+        container.dispatchEvent(new Event('static-businesses-loaded'));
         return;
       }
 
@@ -53,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       attachBusinessClicks();
       initStaticModal();
+      container.dataset.staticLoaded = 'true';
+      container.dispatchEvent(new Event('static-businesses-loaded'));
     })
     .catch((error) => {
       console.error('Error loading businesses:', error);
@@ -62,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <p>Error loading businesses. Please try again later.</p>
         </div>
       `;
+      container.dataset.staticLoaded = 'true';
+      container.dispatchEvent(new Event('static-businesses-loaded'));
     });
 });
 
