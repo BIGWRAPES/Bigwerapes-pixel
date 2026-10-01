@@ -5,6 +5,7 @@ const productImagesInput = document.getElementById('productImages');
 const productImageCount = document.getElementById('productImageCount');
 const productImagePreviews = document.getElementById('productImagePreviews');
 const ownedBusinesses = document.getElementById('ownedBusinesses');
+const saveOwnerProfileButton = document.getElementById('saveOwnerProfileButton');
 const bucketName = 'business-images';
 const maxProductImages = 15;
 const maxImageBytes = 5 * 1024 * 1024;
@@ -45,6 +46,23 @@ function safeFileName(file) {
 
 function makeImagePath(userId, businessId, file) {
   return `${userId}/${businessId}/${crypto.randomUUID()}-${safeFileName(file)}`;
+}
+
+async function saveOwnerProfile(user) {
+  const ownerProfile = {
+    owner_id: user.id,
+    owner_name: document.getElementById('ownerName').value.trim(),
+    owner_avatar_url: document.getElementById('ownerAvatarUrl').value.trim() || null,
+    owner_bio: document.getElementById('ownerBio').value.trim()
+  };
+  if (!ownerProfile.owner_name || !ownerProfile.owner_bio) {
+    throw new Error('Enter a display name and short bio for your public profile.');
+  }
+
+  const { error } = await supabase
+    .from('business_owner_public_profiles')
+    .upsert(ownerProfile, { onConflict: 'owner_id' });
+  if (error) throw error;
 }
 
 function renderSelectedPreviews() {
@@ -227,7 +245,34 @@ async function loadOwnedBusinesses() {
 
 currentUserPromise.then((user) => {
   if (!user) return;
+  supabase
+    .from('business_owner_public_profiles')
+    .select('owner_name, owner_avatar_url, owner_bio')
+    .eq('owner_id', user.id)
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (error) throw error;
+      if (!data) return;
+      document.getElementById('ownerName').value = data.owner_name || '';
+      document.getElementById('ownerAvatarUrl').value = data.owner_avatar_url || '';
+      document.getElementById('ownerBio').value = data.owner_bio || '';
+    })
+    .catch((error) => showMessage(error.message));
   loadOwnedBusinesses().catch((error) => showMessage(error.message));
+});
+
+saveOwnerProfileButton.addEventListener('click', async () => {
+  saveOwnerProfileButton.disabled = true;
+  try {
+    const user = await currentUserPromise;
+    if (!user) throw new Error('Please sign in to save your public profile.');
+    await saveOwnerProfile(user);
+    showMessage('Your public profile was saved.', 'success');
+  } catch (error) {
+    showMessage(error.message || 'Unable to save your public profile.');
+  } finally {
+    saveOwnerProfileButton.disabled = false;
+  }
 });
 
 document.getElementById('signOutButton').addEventListener('click', async () => {
@@ -259,6 +304,8 @@ form.addEventListener('submit', async (event) => {
     if (selectedProductImages.length < 1 || selectedProductImages.length > maxProductImages) {
       throw new Error(`Choose between 1 and ${maxProductImages} product images.`);
     }
+
+    await saveOwnerProfile(user);
 
     coverImagePath = `${user.id}/covers/${crypto.randomUUID()}-${safeFileName(coverImage)}`;
     const { error: uploadError } = await supabase.storage

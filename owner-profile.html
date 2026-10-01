@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Business Owner - Bigwrapes-Pixel</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; background: #101415; }
+    .owner-page { width: min(100% - 32px, 980px); margin: 0 auto; padding: 36px 0 64px; }
+    .owner-header { display: flex; align-items: center; gap: 22px; padding: 28px 0; border-bottom: 1px solid rgba(255,255,255,.16); }
+    .owner-avatar { width: 104px; height: 104px; flex: 0 0 104px; object-fit: cover; border-radius: 50%; background: #26302e; }
+    .owner-name { color: var(--heading-color, #fff); margin: 0 0 8px; font-size: 30px; }
+    .owner-bio { max-width: 680px; margin: 0; }
+    .owner-business { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 20px; padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,.12); }
+    .business-cover { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #26302e; }
+    .product-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; margin-top: 14px; }
+    .product-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
+    #ownerPageMessage { margin-top: 24px; }
+    @media (max-width: 600px) {
+      .owner-header { align-items: flex-start; }
+      .owner-avatar { width: 76px; height: 76px; flex-basis: 76px; }
+      .owner-name { font-size: 24px; }
+      .owner-business { grid-template-columns: 1fr; }
+      .business-cover { max-height: 260px; }
+    }
+  </style>
+  <script type="module" src="assets/js/supabase-client.js"></script>
+</head>
+<body>
+  <main class="owner-page">
+    <a href="businesses.html" class="d-inline-flex align-items-center gap-2 mb-3"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to businesses</a>
+    <div id="ownerPageMessage" class="alert" role="status" aria-live="polite" hidden></div>
+    <section id="ownerProfile" class="owner-header" hidden>
+      <img id="ownerAvatar" class="owner-avatar" alt="">
+      <div>
+        <h1 id="ownerName" class="owner-name"></h1>
+        <p id="ownerBio" class="owner-bio"></p>
+      </div>
+    </section>
+    <section aria-labelledby="ownerBusinessesHeading">
+      <h2 id="ownerBusinessesHeading" class="h3 mt-4">Businesses</h2>
+      <div id="ownerBusinesses"><p>Loading owner profile...</p></div>
+    </section>
+  </main>
+  <script type="module" src="assets/js/owner-profile.js"></script>
+</body>
+</html>

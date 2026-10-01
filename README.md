@@ -26,7 +26,7 @@ The student and entrepreneur signup pages, login, password reset, business submi
 
 The site is static, so the Supabase SDK is loaded as a browser ES module from `esm.sh`; this lets GitHub Pages run the integration without a server build step. The npm dependency is also installed for local development and future bundling. Open the site through a local web server rather than `file://` so browser modules and relative URLs work correctly.
 
-New submitted businesses are stored in Supabase and shown alongside the existing manually maintained entries in `assets/data/businesses.json`. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
+New submitted businesses are stored in Supabase and shown alongside the existing manually maintained entries in `assets/data/businesses.json`. The submission form saves the owner's public name, avatar URL, and bio in `business_owner_public_profiles`; public owner cards link to `owner-profile.html?owner_id=...`, which loads that profile and its businesses. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
 
 ## Deploy to GitHub Pages
 1. Push this folder to a GitHub repository.
@@ -37,30 +37,39 @@ New submitted businesses are stored in Supabase and shown alongside the existing
 ## Manual business editing
 To add or update business cards, edit the file at `assets/data/businesses.json`.
 
-Each item looks like this:
+The file is a JSON array. Add a comma after the current last business object, then paste a new object before the closing `]`. Replace the example values with the real business details. Use an unused numeric `id` and a unique lowercase `business_slug`.
 
 ```json
 {
-  "id": 1,
+  "id": 4,
   "business_name": "Your Business Name",
+  "business_slug": "your-business-name",
+  "description": "Describe the products or services this student business offers.",
   "category": "Digital Services",
-  "owner_name": "Owner Name",
-  "description": "Short business description",
-  "phone": "+234 800 000 0000",
-  "whatsapp_link": "https://wa.me/2348000000000",
-  "email": "hello@yourbusiness.com",
-  "location": "Abuja, Nigeria",
-  "rating": 4.9,
-  "review_count": 12,
   "logo_url": "assets/img/portfolio/portfolio-3.webp",
   "cover_image_url": "assets/img/about/wall45.jpg",
+  "owner_name": "Student Owner",
+  "owner_avatar_url": "assets/img/person/person-1.jpg",
+  "owner_bio": "A short introduction to the student business owner.",
+  "phone": "+234 800 000 0000",
+  "whatsapp_number": "+2348000000000",
+  "whatsapp_link": "https://wa.me/2348000000000",
+  "email": "owner@example.com",
+  "website_url": "https://example.com",
+  "location": "Abuja, Nigeria",
+  "rating": 0,
+  "review_count": 0,
+  "is_verified": false,
   "portfolio": [
-    { "title": "Project One", "image": "assets/img/portfolio/portfolio-1.webp" }
+    {
+      "title": "Product or Service One",
+      "image": "assets/img/portfolio/portfolio-1.webp"
+    }
   ]
 }
 ```
 
-To add a new business, copy one object and replace the values.
+Keep the surrounding square brackets and put commas between objects, but not after the final object. The example above is a template only; it will appear on the site only after you add the object to `assets/data/businesses.json`. New accounts submitted through the signed-in form are stored in Supabase instead of this local file.
 
 ## Important note
 This static version is meant to keep the website visible online without the paid hosting/database requirement. Any feature that depends on server-side logic will need a future backend or external API service.

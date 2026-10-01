@@ -30,6 +30,16 @@
     </div>
     <div id="businessMessage" class="alert" role="status" aria-live="polite"></div>
     <form id="businessForm">
+      <h2 class="h5 mt-3">Public owner profile</h2>
+      <label class="form-label" for="ownerName">Display name</label>
+      <input class="form-control" id="ownerName" maxlength="120" autocomplete="name" required>
+      <label class="form-label" for="ownerAvatarUrl">Profile image URL</label>
+      <input class="form-control" id="ownerAvatarUrl" type="url" maxlength="2048" placeholder="https://example.com/photo.jpg">
+      <label class="form-label" for="ownerBio">Short bio</label>
+      <textarea class="form-control" id="ownerBio" rows="3" maxlength="1000" required></textarea>
+      <button class="btn btn-outline-primary" id="saveOwnerProfileButton" type="button">Save public profile</button>
+
+      <h2 class="h5 mt-4">Business details</h2>
       <label class="form-label" for="businessName">Business name</label>
       <input class="form-control" id="businessName" maxlength="120" required>
       <label class="form-label" for="category">Category</label>

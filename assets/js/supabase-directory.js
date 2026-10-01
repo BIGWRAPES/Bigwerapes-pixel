@@ -21,7 +21,25 @@ function appendBusinessCard(business, imageUrl) {
   const description = document.createElement('p');
   description.textContent = business.description;
 
-  content.append(title, category, description);
+  const ownerProfile = business.ownerProfile;
+  const ownerLink = document.createElement(ownerProfile ? 'a' : 'span');
+  ownerLink.className = 'business-owner-link';
+  if (ownerProfile) {
+    ownerLink.href = `owner-profile.html?owner_id=${encodeURIComponent(business.owner_id)}`;
+  }
+  ownerLink.textContent = ownerProfile?.owner_name || 'Student business owner';
+  if (ownerProfile?.owner_avatar_url) {
+    const ownerAvatar = document.createElement('img');
+    ownerAvatar.src = ownerProfile.owner_avatar_url;
+    ownerAvatar.alt = '';
+    ownerAvatar.loading = 'lazy';
+    ownerAvatar.width = 36;
+    ownerAvatar.height = 36;
+    ownerAvatar.style.cssText = 'width:36px;height:36px;object-fit:cover;border-radius:50%;margin-right:8px;';
+    ownerLink.prepend(ownerAvatar);
+  }
+
+  content.append(title, category, ownerLink, description);
   if (business.business_product_images?.length) {
     const productGallery = document.createElement('div');
     productGallery.className = 'business-product-thumbnails';
@@ -50,22 +68,34 @@ if (directory) {
     .then(([supabase]) =>
       supabase
         .from('businesses')
-        .select('id, business_name, category, description, image_path, created_at, business_product_images(image_path)')
+        .select('id, owner_id, business_name, category, description, image_path, created_at, business_product_images(image_path)')
         .order('created_at', { ascending: false })
     )
     .then(({ data, error }) => {
       if (error) throw error;
+      if (!data.length) return;
 
       return window.supabaseReady.then((supabase) => {
-        data.forEach((business) => {
-          const imageUrl = business.image_path
-            ? supabase.storage.from('business-images').getPublicUrl(business.image_path).data.publicUrl
-            : '';
-          business.business_product_images = (business.business_product_images || []).map((photo) => ({
-              publicUrl: supabase.storage.from('business-images').getPublicUrl(photo.image_path).data.publicUrl
-          }));
-          appendBusinessCard(business, imageUrl);
-        });
+        const ownerIds = [...new Set(data.map((business) => business.owner_id).filter(Boolean))];
+        return supabase
+          .from('business_owner_public_profiles')
+          .select('owner_id, owner_name, owner_avatar_url, owner_bio')
+          .in('owner_id', ownerIds)
+          .then(({ data: ownerProfiles, error: profileError }) => {
+            if (profileError) throw profileError;
+            const profilesByOwnerId = new Map(ownerProfiles.map((profile) => [profile.owner_id, profile]));
+
+            data.forEach((business) => {
+              const imageUrl = business.image_path
+                ? supabase.storage.from('business-images').getPublicUrl(business.image_path).data.publicUrl
+                : '';
+              business.ownerProfile = profilesByOwnerId.get(business.owner_id);
+              business.business_product_images = (business.business_product_images || []).map((photo) => ({
+                publicUrl: supabase.storage.from('business-images').getPublicUrl(photo.image_path).data.publicUrl
+              }));
+              appendBusinessCard(business, imageUrl);
+            });
+          });
       });
     })
     .catch((error) => {
