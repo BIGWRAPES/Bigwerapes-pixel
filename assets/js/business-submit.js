@@ -48,6 +48,33 @@ function makeImagePath(userId, businessId, file) {
   return `${userId}/${businessId}/${crypto.randomUUID()}-${safeFileName(file)}`;
 }
 
+function slugifyBusinessName(name) {
+  return name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || 'business';
+}
+
+async function createBusinessSlug(name) {
+  const baseSlug = slugifyBusinessName(name);
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('business_slug', candidate)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return candidate;
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
 async function saveOwnerProfile(user) {
   const ownerProfile = {
     owner_id: user.id,
@@ -313,9 +340,12 @@ form.addEventListener('submit', async (event) => {
       .upload(coverImagePath, coverImage, { contentType: coverImage.type, upsert: false });
     if (uploadError) throw uploadError;
 
+    const businessName = document.getElementById('businessName').value.trim();
+    const businessSlug = await createBusinessSlug(businessName);
     const { data: business, error: insertError } = await supabase.from('businesses').insert({
       owner_id: user.id,
-      business_name: document.getElementById('businessName').value.trim(),
+      business_name: businessName,
+      business_slug: businessSlug,
       category: document.getElementById('category').value,
       description: document.getElementById('description').value.trim(),
       image_path: coverImagePath

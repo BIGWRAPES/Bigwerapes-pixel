@@ -153,18 +153,30 @@ h6 {
 
 .header .logo {
   line-height: 1;
+  gap: 10px;
 }
 
 .header .logo img {
-  max-height: 36px;
-  margin-right: 8px;
+  width: 42px;
+  height: 42px;
+  max-height: none;
+  margin-right: 0;
 }
 
 .header .logo h1 {
-  font-size: 30px;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 21px;
   margin: 0;
-  font-weight: 400;
+  font-weight: 700;
   color: var(--heading-color);
+  letter-spacing: 0;
+}
+
+.header .logo .brand-pixel {
+  color: #56d8b1;
+  font-weight: 500;
 }
 
 .header .header-social-links {
@@ -2024,6 +2036,44 @@ section,
   .portfolio .portfolio-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 50px;
+  }
+}
+
+/*--------------------------------------------------------------
+# Sponsors Section
+--------------------------------------------------------------*/
+.sponsors .sponsor-logo-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: center;
+  gap: 20px 28px;
+}
+
+.sponsors .sponsor-logo {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  padding: 16px;
+  border-block: 1px solid color-mix(in srgb, var(--default-color), transparent 88%);
+  transition: 0.3s;
+}
+
+.sponsors .sponsor-logo img {
+  display: block;
+  width: min(100%, 190px);
+  height: 82px;
+  object-fit: contain;
+  transition: 0.3s;
+}
+
+.sponsors .sponsor-logo:hover img {
+  transform: translateY(-3px);
+}
+
+@media (max-width: 480px) {
+  .sponsors .sponsor-logo-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }
 

@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="${business.logo_url || 'assets/img/portfolio/portfolio-3.webp'}" class="glightbox zoom-link" title="${business.business_name}">
                       <i class="bi bi-zoom-in"></i>
                     </a>
-                    <a href="#" class="details-link" title="View Business Details" data-open-business="${business.id}">
+                    <a href="business.html?slug=${encodeURIComponent(business.business_slug || '')}" class="details-link" title="View Business Details">
                       <i class="bi bi-arrow-right"></i>
                     </a>
                   </div>
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span><i class="bi bi-star-fill" style="color: var(--accent-color, #008870);"></i> ${business.rating || 'N/A'}</span>
                   <span style="margin-left: 0.5rem;"><i class="bi bi-chat-left"></i> ${business.review_count || 0} reviews</span>
                 </div>
+                ${business.business_slug ? `<a href="business.html?slug=${encodeURIComponent(business.business_slug)}" class="btn btn-primary btn-sm mt-3">View Business</a>` : ''}
               </div>
             </div>
           </div>

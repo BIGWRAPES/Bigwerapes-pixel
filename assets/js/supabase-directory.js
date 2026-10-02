@@ -40,6 +40,13 @@ function appendBusinessCard(business, imageUrl) {
   }
 
   content.append(title, category, ownerLink, description);
+  if (business.business_slug) {
+    const profileLink = document.createElement('a');
+    profileLink.className = 'btn btn-primary btn-sm mt-3';
+    profileLink.href = `business.html?slug=${encodeURIComponent(business.business_slug)}`;
+    profileLink.textContent = 'View Business';
+    content.append(profileLink);
+  }
   if (business.business_product_images?.length) {
     const productGallery = document.createElement('div');
     productGallery.className = 'business-product-thumbnails';
@@ -68,7 +75,7 @@ if (directory) {
     .then(([supabase]) =>
       supabase
         .from('businesses')
-        .select('id, owner_id, business_name, category, description, image_path, created_at, business_product_images(image_path)')
+        .select('id, owner_id, business_name, business_slug, category, description, image_path, created_at, business_product_images(image_path)')
         .order('created_at', { ascending: false })
     )
     .then(({ data, error }) => {

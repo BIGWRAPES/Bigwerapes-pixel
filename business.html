@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore this student-run business on BigWrapes Pixel.">
+  <meta property="og:title" content="Business profile - BigWrapes Pixel">
+  <meta property="og:description" content="Explore this student-run business on BigWrapes Pixel.">
+  <meta property="og:type" content="website">
+  <title>Business profile - BigWrapes Pixel</title>
+  <link rel="icon" href="assets/img/bigwrapes-pixel-mark.svg" type="image/svg+xml">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; background: #101415; }
+    .business-page { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .business-topbar { min-height: 74px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,.14); }
+    .business-topbar a { color: #fff; font-weight: 700; }
+    .business-topbar img { width: 38px; height: 38px; margin-right: 10px; }
+    #businessMessage { margin: 30px 0; }
+    .business-profile { padding: 36px 0 50px; }
+    .business-category { margin: 0 0 8px; color: #56d8b1; font-weight: 600; }
+    .business-name { margin: 0 0 22px; font-size: clamp(28px, 6vw, 42px); }
+    .business-cover { display: block; width: 100%; max-height: 520px; aspect-ratio: 16 / 8; object-fit: cover; border-radius: 8px; background: #26302e; }
+    .business-description { max-width: 760px; margin: 24px 0 34px; line-height: 1.75; white-space: pre-line; }
+    .business-section { padding: 24px 0; border-top: 1px solid rgba(255,255,255,.14); }
+    .business-section h2 { margin: 0 0 16px; font-size: 20px; }
+    .business-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .business-products img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: #26302e; }
+    .business-contacts { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+    .business-contacts a { overflow-wrap: anywhere; }
+    .business-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .business-actions button { display: inline-flex; align-items: center; gap: 8px; }
+    .business-footer { padding: 22px 0 36px; border-top: 1px solid rgba(255,255,255,.14); }
+    .business-footer a { color: #56d8b1; font-weight: 600; }
+    @media (max-width: 600px) {
+      .business-profile { padding-top: 26px; }
+      .business-cover { aspect-ratio: 4 / 3; }
+      .business-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+  <script type="module" src="assets/js/supabase-client.js"></script>
+  <script type="module" src="assets/js/business.js"></script>
+</head>
+<body>
+  <header class="business-topbar">
+    <a class="business-page d-flex align-items-center" href="index.html">
+      <img src="assets/img/bigwrapes-pixel-mark.svg" alt="">
+      <span>BigWrapes Pixel</span>
+    </a>
+  </header>
+  <main class="business-page">
+    <p id="businessMessage" class="alert" role="status" aria-live="polite">Loading business profile...</p>
+    <article id="businessProfile" class="business-profile" hidden>
+      <header>
+        <p id="businessCategory" class="business-category"></p>
+        <h1 id="businessName" class="business-name"></h1>
+      </header>
+      <img id="businessCover" class="business-cover" alt="" hidden>
+      <p id="businessDescription" class="business-description"></p>
+      <section id="productsSection" class="business-section" aria-labelledby="productsHeading" hidden>
+        <h2 id="productsHeading">Products and work</h2>
+        <div id="businessProducts" class="business-products"></div>
+      </section>
+      <section id="contactSection" class="business-section" aria-labelledby="contactHeading" hidden>
+        <h2 id="contactHeading">Contact and location</h2>
+        <div id="businessContacts" class="business-contacts"></div>
+      </section>
+      <div class="business-actions">
+        <a id="whatsappButton" class="btn btn-primary" target="_blank" rel="noopener noreferrer" hidden>
+          <i class="bi bi-whatsapp" aria-hidden="true"></i> Contact on WhatsApp
+        </a>
+        <button id="shareButton" class="btn btn-outline-primary" type="button">
+          <i class="bi bi-share" aria-hidden="true"></i> Share business
+        </button>
+        <button id="copyLinkButton" class="btn btn-outline-secondary" type="button">
+          <i class="bi bi-link-45deg" aria-hidden="true"></i> Copy link
+        </button>
+      </div>
+    </article>
+    <footer class="business-footer">
+      <a href="index.html">Listed on BigWrapes Pixel</a>
+    </footer>
+  </main>
+  <script defer src="assets/js/user-guide.js"></script>
+</body>
+</html>
