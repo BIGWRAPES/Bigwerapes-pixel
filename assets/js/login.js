@@ -9,6 +9,10 @@ function showMessage(text, type = 'danger') {
   message.style.display = 'block';
 }
 
+if (new URLSearchParams(window.location.search).get('registered') === '1') {
+  showMessage('Your account was created. click sign in to Access your dashboard, then log in.', 'success');
+}
+
 if (new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery') {
   form.hidden = true;
   recoveryForm.hidden = false;

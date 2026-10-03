@@ -701,7 +701,7 @@
 
             try {
                 const supabase = await window.supabaseReady;
-                const { data, error } = await supabase.auth.signUp({
+                const { error } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
@@ -711,15 +711,7 @@
                 });
                 if (error) throw error;
 
-                if (data.session) {
-                    showSuccess('Account created. Taking you to your business dashboard...');
-                    setTimeout(() => window.location.assign('business-submit.html'), 1200);
-                } else {
-                    showSuccess('Account created. Check your email to confirm it, then sign in.');
-                    signupBtn.disabled = false;
-                    signupBtn.classList.remove('loading');
-                    signupBtn.textContent = 'Create Account';
-                }
+                window.location.assign('login.html?registered=1');
             } catch (error) {
                 console.error('Signup error:', error);
                 showError('An error occurred: ' + error.message + '. Please check your connection and try again.');
