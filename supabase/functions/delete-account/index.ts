@@ -8,6 +8,27 @@ const corsHeaders = {
 const bucketName = 'business-images';
 const storagePageSize = 100;
 
+function getDefaultApiKey(keysJson: string | undefined, variableName: string) {
+  if (!keysJson) return undefined;
+
+  let keys: unknown;
+  try {
+    keys = JSON.parse(keysJson);
+  } catch {
+    throw new Error(`${variableName} is not valid JSON.`);
+  }
+
+  if (!keys || typeof keys !== 'object' || Array.isArray(keys)) {
+    throw new Error(`${variableName} must be a JSON object.`);
+  }
+
+  const defaultKey = (keys as Record<string, unknown>).default;
+  if (typeof defaultKey !== 'string' || !defaultKey) {
+    throw new Error(`${variableName} does not contain a default key.`);
+  }
+  return defaultKey;
+}
+
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -63,13 +84,19 @@ Deno.serve(async (request) => {
     if (!accessToken) return jsonResponse({ error: 'Authentication is required.' }, 401);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+    const publishableKey = getDefaultApiKey(
+      Deno.env.get('SUPABASE_PUBLISHABLE_KEYS'),
+      'SUPABASE_PUBLISHABLE_KEYS',
+    ) ?? Deno.env.get('SUPABASE_ANON_KEY');
+    const secretKey = getDefaultApiKey(
+      Deno.env.get('SUPABASE_SECRET_KEYS'),
+      'SUPABASE_SECRET_KEYS',
+    ) ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !publishableKey || !secretKey) {
       throw new Error('Required Supabase function secrets are not configured.');
     }
 
-    const authClient = createClient(supabaseUrl, anonKey, {
+    const authClient = createClient(supabaseUrl, publishableKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
     const { data: { user }, error: authError } = await authClient.auth.getUser(accessToken);
@@ -79,7 +106,7 @@ Deno.serve(async (request) => {
     }
     if (!user) return jsonResponse({ error: 'The session is invalid or expired.' }, 401);
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    const adminClient = createClient(supabaseUrl, secretKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
