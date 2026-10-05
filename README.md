@@ -28,6 +28,14 @@ The site is static, so the Supabase SDK is loaded as a browser ES module from `e
 
 New submitted businesses are stored in Supabase and shown alongside the existing manually maintained entries in `assets/data/businesses.json`. The submission form saves the owner's public name, avatar URL, and bio in `business_owner_public_profiles`; public owner cards link to `owner-profile.html?owner_id=...`, which loads that profile and its businesses. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
 
+## Business pictures and account deletion
+
+On the signed-in business page, each business has controls to change or delete its cover picture. Replacements upload a new file first, switch `businesses.image_path` only after upload succeeds, and then try to remove the old file. Removing a picture clears `image_path` and displays the site default image. Both operations use the existing `business-images` bucket and the authenticated owner's Storage policies.
+
+The Danger Zone calls the `delete-account` Supabase Edge Function. The function verifies the caller's access token, recursively removes files under that user's `business-images/<user-id>/` folder through Storage, deletes product-image rows for that user's businesses and their public owner profile, then deletes the Supabase Auth user. Existing foreign-key cascades remove the profile and businesses. Each step is retryable while the Auth user remains; the function requires the server-side `SUPABASE_SERVICE_ROLE_KEY`, and the browser must only use the public anon key.
+
+Before deploying, inspect the **live** Supabase project rather than assuming the checked-in SQL matches it. Confirm the bucket and policies, `businesses.image_path` and `owner_id`, the `business_owner_public_profiles.owner_id` table/column, and the live foreign keys/cascades. The repository contains no separate application-data table; if the live project has additional user-related tables, add their explicit cleanup to `supabase/functions/delete-account/index.ts` before deployment. Deploy with the Supabase CLI using `supabase functions deploy delete-account`, and configure the service-role secret in the Supabase Edge Function environment. Never put that key in this repository or browser code.
+
 ## Deploy to GitHub Pages
 1. Push this folder to a GitHub repository.
 2. In the repo, enable GitHub Pages.

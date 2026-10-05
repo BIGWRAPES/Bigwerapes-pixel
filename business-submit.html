@@ -19,6 +19,9 @@
     .photo-preview img, .owned-product-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
     .photo-preview button, .owned-product-photo button { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; padding: 0; margin: 0; }
     .owned-business { padding: 22px 0; border-top: 1px solid rgba(255, 255, 255, .15); }
+    .owned-business-cover { width: min(100%, 280px); aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; }
+    .picture-controls button, .danger-zone button { margin-top: 0; }
+    .danger-zone { padding: 22px; border: 1px solid #dc3545; border-radius: 8px; }
   </style>
   <script type="module" src="assets/js/supabase-client.js"></script>
 </head>
@@ -64,6 +67,11 @@
       <h2 id="yourBusinessesHeading" class="h4">Your businesses and product photos</h2>
       <p class="form-text">You can add or remove individual product photos. Each business can have up to 15.</p>
       <div id="ownedBusinesses"><p>Loading your businesses...</p></div>
+    </section>
+    <section class="danger-zone mt-5" aria-labelledby="dangerZoneHeading">
+      <h2 id="dangerZoneHeading" class="h4 text-danger">Danger Zone</h2>
+      <p>Deleting your account is permanent. Your business pages, public owner profile, and associated images will also be deleted.</p>
+      <button class="btn btn-danger" id="deleteAccountButton" type="button">Delete My Account</button>
     </section>
     <p class="mt-3 mb-0"><a href="businesses.html">Back to business directory</a></p>
   </main>

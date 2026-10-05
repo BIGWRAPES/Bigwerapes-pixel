@@ -6,7 +6,9 @@ const productImageCount = document.getElementById('productImageCount');
 const productImagePreviews = document.getElementById('productImagePreviews');
 const ownedBusinesses = document.getElementById('ownedBusinesses');
 const saveOwnerProfileButton = document.getElementById('saveOwnerProfileButton');
+const deleteAccountButton = document.getElementById('deleteAccountButton');
 const bucketName = 'business-images';
+const defaultBusinessImage = 'assets/img/portfolio/portfolio-1.webp';
 const maxProductImages = 15;
 const maxImageBytes = 5 * 1024 * 1024;
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -167,6 +169,82 @@ async function uploadProductImage(user, businessId, file) {
   }
 }
 
+async function replaceBusinessImage(business, file, buttons) {
+  if (!isValidImage(file)) {
+    throw new Error('Use a JPG, PNG, or WebP cover image no larger than 5 MB.');
+  }
+
+  buttons.forEach((button) => { button.disabled = true; });
+  const newImagePath = `${currentUser.id}/covers/${crypto.randomUUID()}-${safeFileName(file)}`;
+  let uploaded = false;
+  let businessUpdated = false;
+  try {
+    const { error: uploadError } = await supabase.storage
+      .from(bucketName)
+      .upload(newImagePath, file, { contentType: file.type, upsert: false });
+    if (uploadError) throw uploadError;
+    uploaded = true;
+
+    const { data, error: updateError } = await supabase
+      .from('businesses')
+      .update({ image_path: newImagePath })
+      .eq('id', business.id)
+      .eq('owner_id', currentUser.id)
+      .select('id')
+      .maybeSingle();
+    if (updateError) throw updateError;
+    if (!data) throw new Error('The business could not be updated. Refresh the page and try again.');
+    businessUpdated = true;
+
+    let notice = 'Business picture updated.';
+    if (business.image_path) {
+      const { error: removeError } = await supabase.storage.from(bucketName).remove([business.image_path]);
+      if (removeError) notice += ' The previous image could not be removed from Storage.';
+    }
+    showMessage(notice, notice.includes('could not') ? 'warning' : 'success');
+    await loadOwnedBusinesses();
+  } catch (error) {
+    if (uploaded && !businessUpdated) {
+      const { error: cleanupError } = await supabase.storage.from(bucketName).remove([newImagePath]);
+      if (cleanupError) {
+        throw new Error(`${error.message} The newly uploaded image could not be cleaned up: ${cleanupError.message}`);
+      }
+    }
+    throw error;
+  } finally {
+    buttons.forEach((button) => { button.disabled = false; });
+  }
+}
+
+async function deleteBusinessImage(business, buttons) {
+  if (!business.image_path) return;
+  if (!window.confirm(`Delete the business picture for "${business.business_name}"?`)) return;
+
+  buttons.forEach((button) => { button.disabled = true; });
+  try {
+    const { error: removeError } = await supabase.storage.from(bucketName).remove([business.image_path]);
+    if (removeError) throw removeError;
+
+    const { data, error: updateError } = await supabase
+      .from('businesses')
+      .update({ image_path: null })
+      .eq('id', business.id)
+      .eq('owner_id', currentUser.id)
+      .select('id')
+      .maybeSingle();
+    if (updateError) {
+      throw new Error(`The image file was removed, but the business record could not be updated: ${updateError.message}`);
+    }
+    if (!data) {
+      throw new Error('The image file was removed, but the business record could not be updated. Retry to clear the picture.');
+    }
+    await loadOwnedBusinesses();
+    showMessage('Business picture deleted.', 'success');
+  } finally {
+    buttons.forEach((button) => { button.disabled = false; });
+  }
+}
+
 function createProductPhoto(business, photo) {
   const wrapper = document.createElement('div');
   wrapper.className = 'owned-product-photo';
@@ -206,7 +284,7 @@ function createProductPhoto(business, photo) {
 async function loadOwnedBusinesses() {
   const { data, error } = await supabase
     .from('businesses')
-    .select('id, business_name, category, business_product_images(id, image_path, created_at)')
+    .select('id, business_name, category, image_path, business_product_images(id, image_path, created_at)')
     .eq('owner_id', currentUser.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -223,6 +301,52 @@ async function loadOwnedBusinesses() {
     const heading = document.createElement('h3');
     heading.className = 'h5';
     heading.textContent = business.business_name;
+    const coverHeading = document.createElement('h4');
+    coverHeading.className = 'h6 mt-3';
+    coverHeading.textContent = 'Business profile picture';
+    const coverImage = document.createElement('img');
+    coverImage.className = 'owned-business-cover';
+    coverImage.src = business.image_path
+      ? supabase.storage.from(bucketName).getPublicUrl(business.image_path).data.publicUrl
+      : defaultBusinessImage;
+    coverImage.alt = `${business.business_name} picture`;
+    coverImage.loading = 'lazy';
+    const pictureControls = document.createElement('div');
+    pictureControls.className = 'picture-controls d-flex flex-wrap gap-2 mt-2';
+    const changePictureButton = document.createElement('button');
+    changePictureButton.type = 'button';
+    changePictureButton.className = 'btn btn-outline-primary btn-sm';
+    changePictureButton.textContent = 'Change Picture';
+    const pictureInput = document.createElement('input');
+    pictureInput.type = 'file';
+    pictureInput.accept = allowedImageTypes.join(',');
+    pictureInput.className = 'visually-hidden';
+    pictureInput.setAttribute('aria-label', `Choose a new business picture for ${business.business_name}`);
+    const deletePictureButton = document.createElement('button');
+    deletePictureButton.type = 'button';
+    deletePictureButton.className = 'btn btn-outline-danger btn-sm';
+    deletePictureButton.textContent = 'Delete Picture';
+    deletePictureButton.disabled = !business.image_path;
+    const pictureButtons = [changePictureButton, deletePictureButton];
+    changePictureButton.addEventListener('click', () => pictureInput.click());
+    pictureInput.addEventListener('change', async () => {
+      const file = pictureInput.files[0];
+      pictureInput.value = '';
+      if (!file) return;
+      try {
+        await replaceBusinessImage(business, file, pictureButtons);
+      } catch (error) {
+        showMessage(error.message || 'Unable to update the business picture.');
+      }
+    });
+    deletePictureButton.addEventListener('click', async () => {
+      try {
+        await deleteBusinessImage(business, pictureButtons);
+      } catch (error) {
+        showMessage(error.message || 'Unable to delete the business picture.');
+      }
+    });
+    pictureControls.append(changePictureButton, deletePictureButton, pictureInput);
     const count = document.createElement('p');
     count.className = 'form-text';
     count.textContent = `${business.business_product_images.length} of ${maxProductImages} product images`;
@@ -265,7 +389,7 @@ async function loadOwnedBusinesses() {
       }
     });
 
-    section.append(heading, count, grid, addLabel, addInput);
+    section.append(heading, coverHeading, coverImage, pictureControls, count, grid, addLabel, addInput);
     ownedBusinesses.append(section);
   });
 }
@@ -310,6 +434,34 @@ document.getElementById('signOutButton').addEventListener('click', async () => {
     window.location.replace('login.html');
   } catch (error) {
     showMessage(error.message);
+  }
+});
+
+deleteAccountButton.addEventListener('click', async () => {
+  if (!window.confirm('Permanently delete your account, business listings, public owner profile, and associated images? This cannot be undone.')) return;
+
+  deleteAccountButton.disabled = true;
+  deleteAccountButton.textContent = 'Deleting account...';
+  try {
+    const user = await currentUserPromise;
+    if (!user) throw new Error('Please sign in again before deleting your account.');
+
+    const { error: deleteError } = await supabase.functions.invoke('delete-account');
+    if (deleteError) {
+      const response = deleteError.context;
+      const body = response instanceof Response
+        ? await response.json().catch(() => null)
+        : null;
+      throw new Error(body?.error || deleteError.message);
+    }
+
+    const { error: signOutError } = await supabase.auth.signOut({ scope: 'local' });
+    if (signOutError) throw signOutError;
+    window.location.replace('login.html');
+  } catch (error) {
+    showMessage(error.message || 'Unable to delete your account.');
+    deleteAccountButton.disabled = false;
+    deleteAccountButton.textContent = 'Delete My Account';
   }
 });
 
