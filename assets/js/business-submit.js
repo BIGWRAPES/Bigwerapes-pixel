@@ -46,6 +46,14 @@ function safeFileName(file) {
   return file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
 }
 
+function readWhatsAppNumber(value) {
+  const number = value.trim();
+  if (number && !/\d/.test(number)) {
+    throw new Error('Enter a WhatsApp number with its international country code.');
+  }
+  return number || null;
+}
+
 function makeImagePath(userId, businessId, file) {
   return `${userId}/${businessId}/${crypto.randomUUID()}-${safeFileName(file)}`;
 }
@@ -147,7 +155,7 @@ productImagesInput.addEventListener('change', () => {
   renderSelectedPreviews();
 });
 
-async function uploadProductImage(user, businessId, file) {
+async function uploadProductImage(user, businessId, file, productId = null) {
   if (!isValidImage(file)) {
     throw new Error('Use JPG, PNG, or WebP images no larger than 5 MB each.');
   }
@@ -158,15 +166,56 @@ async function uploadProductImage(user, businessId, file) {
     .upload(imagePath, file, { contentType: file.type, upsert: false });
   if (uploadError) throw uploadError;
 
-  const { error: insertError } = await supabase.from('business_product_images').insert({
+  const payload = {
     business_id: businessId,
     owner_id: user.id,
-    image_path: imagePath
-  });
+    image_path: imagePath,
+    product_id: productId
+  };
+
+  const { error: insertError } = await supabase.from('business_product_images').insert(payload);
   if (insertError) {
     await supabase.storage.from(bucketName).remove([imagePath]);
     throw insertError;
   }
+}
+
+async function createProductRecord(businessId, userId) {
+  const productName = document.getElementById('productName').value.trim();
+  const productDescription = document.getElementById('productDescription').value.trim();
+  const productPriceRaw = document.getElementById('productPrice').value;
+  const productPrice = productPriceRaw === '' ? null : Number(productPriceRaw);
+
+  if (!productName && !productDescription && productPriceRaw === '' && selectedProductImages.length > 0) {
+    return null;
+  }
+
+  if (!productName && !productDescription && productPriceRaw === '') {
+    return null;
+  }
+
+  if (!productName) {
+    throw new Error('Enter a product name before saving product details.');
+  }
+
+  if (Number.isNaN(productPrice)) {
+    throw new Error('Product price must be a valid number.');
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .insert({
+      business_id: businessId,
+      name: productName,
+      description: productDescription || '',
+      price: productPrice,
+      updated_at: new Date().toISOString()
+    })
+    .select('id')
+    .single();
+
+  if (error) throw error;
+  return data.id;
 }
 
 async function replaceBusinessImage(business, file, buttons) {
@@ -245,6 +294,34 @@ async function deleteBusinessImage(business, buttons) {
   }
 }
 
+async function saveBusinessContacts(business, whatsappInput, emailInput, button) {
+  const whatsappNumber = readWhatsAppNumber(whatsappInput.value);
+  const email = emailInput.value.trim();
+  if (email && !emailInput.checkValidity()) {
+    emailInput.reportValidity();
+    throw new Error('Enter a valid business email address.');
+  }
+
+  button.disabled = true;
+  try {
+    const { data, error } = await supabase
+      .from('businesses')
+      .update({
+        whatsapp_number: whatsappNumber,
+        email: email || null
+      })
+      .eq('id', business.id)
+      .eq('owner_id', currentUser.id)
+      .select('id')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error('This business could not be updated. Confirm you are signed in as its owner.');
+    showMessage(`Contact details for "${business.business_name}" were saved.`, 'success');
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function createProductPhoto(business, photo) {
   const wrapper = document.createElement('div');
   wrapper.className = 'owned-product-photo';
@@ -284,7 +361,7 @@ function createProductPhoto(business, photo) {
 async function loadOwnedBusinesses() {
   const { data, error } = await supabase
     .from('businesses')
-    .select('id, business_name, category, image_path, business_product_images(id, image_path, created_at)')
+    .select('id, business_name, category, image_path, whatsapp_number, email, business_product_images(id, image_path, created_at)')
     .eq('owner_id', currentUser.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -347,6 +424,59 @@ async function loadOwnedBusinesses() {
       }
     });
     pictureControls.append(changePictureButton, deletePictureButton, pictureInput);
+    const contactSection = document.createElement('div');
+    contactSection.className = 'owned-business-contacts mt-4';
+    const contactHeading = document.createElement('h4');
+    contactHeading.className = 'h6';
+    contactHeading.textContent = 'Public contact details';
+    const whatsappId = `businessWhatsapp-${business.id}`;
+    const whatsappLabel = document.createElement('label');
+    whatsappLabel.className = 'form-label';
+    whatsappLabel.htmlFor = whatsappId;
+    whatsappLabel.textContent = 'WhatsApp number';
+    const whatsappInput = document.createElement('input');
+    whatsappInput.className = 'form-control';
+    whatsappInput.id = whatsappId;
+    whatsappInput.type = 'tel';
+    whatsappInput.maxLength = 40;
+    whatsappInput.autocomplete = 'tel';
+    whatsappInput.placeholder = 'Include country code';
+    whatsappInput.value = business.whatsapp_number || '';
+    const emailId = `businessEmail-${business.id}`;
+    const emailLabel = document.createElement('label');
+    emailLabel.className = 'form-label';
+    emailLabel.htmlFor = emailId;
+    emailLabel.textContent = 'Business email';
+    const emailInput = document.createElement('input');
+    emailInput.className = 'form-control';
+    emailInput.id = emailId;
+    emailInput.type = 'email';
+    emailInput.maxLength = 254;
+    emailInput.autocomplete = 'email';
+    emailInput.value = business.email || '';
+    const contactHelp = document.createElement('p');
+    contactHelp.className = 'form-text';
+    contactHelp.textContent = 'Both details are public. Enter an international WhatsApp number including its country code.';
+    const saveContactsButton = document.createElement('button');
+    saveContactsButton.type = 'button';
+    saveContactsButton.className = 'btn btn-outline-primary btn-sm mt-2';
+    saveContactsButton.textContent = 'Save contact details';
+    saveContactsButton.addEventListener('click', async () => {
+      try {
+        await saveBusinessContacts(business, whatsappInput, emailInput, saveContactsButton);
+      } catch (error) {
+        showMessage(error.message || 'Unable to save business contact details.');
+      }
+    });
+    contactSection.append(
+      contactHeading,
+      whatsappLabel,
+      whatsappInput,
+      emailLabel,
+      emailInput,
+      contactHelp,
+      saveContactsButton
+    );
     const count = document.createElement('p');
     count.className = 'form-text';
     count.textContent = `${business.business_product_images.length} of ${maxProductImages} product images`;
@@ -389,7 +519,7 @@ async function loadOwnedBusinesses() {
       }
     });
 
-    section.append(heading, coverHeading, coverImage, pictureControls, count, grid, addLabel, addInput);
+    section.append(heading, coverHeading, coverImage, pictureControls, contactSection, count, grid, addLabel, addInput);
     ownedBusinesses.append(section);
   });
 }
@@ -494,19 +624,28 @@ form.addEventListener('submit', async (event) => {
 
     const businessName = document.getElementById('businessName').value.trim();
     const businessSlug = await createBusinessSlug(businessName);
+    const whatsappNumber = readWhatsAppNumber(document.getElementById('businessWhatsAppNumber').value);
     const { data: business, error: insertError } = await supabase.from('businesses').insert({
       owner_id: user.id,
       business_name: businessName,
       business_slug: businessSlug,
       category: document.getElementById('category').value,
       description: document.getElementById('description').value.trim(),
-      image_path: coverImagePath
+      image_path: coverImagePath,
+      whatsapp_number: whatsappNumber,
+      email: document.getElementById('businessEmail').value.trim() || null
     }).select('id').single();
     if (insertError) throw insertError;
     businessId = business.id;
 
+    let createdProductId = null;
+    const hasProductDetails = document.getElementById('productName').value.trim() || document.getElementById('productDescription').value.trim() || document.getElementById('productPrice').value !== '';
+    if (hasProductDetails) {
+      createdProductId = await createProductRecord(business.id, user.id);
+    }
+
     for (const file of selectedProductImages) {
-      await uploadProductImage(user, business.id, file);
+      await uploadProductImage(user, business.id, file, createdProductId);
     }
 
     showMessage('Your business was published successfully.', 'success');

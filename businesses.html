@@ -74,7 +74,16 @@
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div class="search-panel" style="flex: 1 1 360px; max-width: 540px;">
+            <label for="directorySearchInput" class="visually-hidden">Search businesses and products</label>
+            <div class="input-group" style="max-width: 540px;">
+              <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
+              <input id="directorySearchInput" type="search" class="form-control" placeholder="Search businesses, products, or categories" aria-label="Search businesses and products">
+              <button id="directorySearchButton" type="button" class="btn btn-primary">Search</button>
+            </div>
+            <p id="directorySearchStatus" class="form-text text-light mt-2" style="min-height: 1.5em; margin-bottom: 0;">Search businesses and products.</p>
+          </div>
           <div class="portfolio-filters-wrapper" data-aos="fade-up" data-aos-delay="100">
             <ul class="portfolio-filters isotope-filters">
               <li data-filter="*" class="filter-active">All Businesses</li>
@@ -94,7 +103,7 @@
 
         <div class="isotope-layout" data-default-filter="*" data-layout="fitRows" data-sort="original-order">
 
-          <div class="row gy-4 portfolio-grid isotope-container" data-aos="fade-up" data-aos-delay="200">
+          <div class="row gy-3 gx-3 portfolio-grid isotope-container" data-aos="fade-up" data-aos-delay="200">
             <!-- Businesses loaded dynamically via API -->
           </div><!-- End Portfolio Grid -->
 

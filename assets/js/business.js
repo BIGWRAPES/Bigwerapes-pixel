@@ -2,6 +2,13 @@ const message = document.getElementById('businessMessage');
 const profile = document.getElementById('businessProfile');
 const shareButton = document.getElementById('shareButton');
 const copyLinkButton = document.getElementById('copyLinkButton');
+const productViewer = document.getElementById('productViewer');
+const productViewerImage = document.getElementById('productViewerImage');
+const productViewerClose = document.getElementById('productViewerClose');
+const productViewerPrevious = document.getElementById('productViewerPrevious');
+const productViewerNext = document.getElementById('productViewerNext');
+let activeProductImages = [];
+let activeProductImageIndex = 0;
 
 function showError(text) {
   message.textContent = text;
@@ -15,9 +22,10 @@ function imageUrl(supabase, path) {
 }
 
 function contactAnchor(label, href, value, external = false) {
-  if (!value) return null;
+  const contactValue = typeof value === 'string' ? value.trim() : '';
+  if (!contactValue) return null;
   const link = document.createElement('a');
-  link.textContent = `${label}: ${value}`;
+  link.textContent = `${label}: ${contactValue}`;
   link.href = href;
   if (external) {
     link.target = '_blank';
@@ -27,20 +35,9 @@ function contactAnchor(label, href, value, external = false) {
 }
 
 function getWhatsAppUrl(business) {
-  if (business.whatsapp_link) {
-    try {
-      const url = new URL(business.whatsapp_link);
-      if (url.protocol === 'https:' && ['wa.me', 'api.whatsapp.com', 'web.whatsapp.com'].includes(url.hostname)) {
-        return url.href;
-      }
-    } catch {
-      // Fall back to the stored phone number below.
-    }
-  }
-
-  const phoneNumber = (business.whatsapp_number || '').replace(/\D/g, '');
+  const phoneNumber = String(business.whatsapp_number || '').replace(/\D/g, '');
   if (!phoneNumber) return '';
-  return `https://wa.me/${phoneNumber}?text=${encodeURIComponent('Hello, I found your business on BigWrapes Pixel.')}`;
+  return `https://wa.me/${phoneNumber}`;
 }
 
 function getInstagramUrl(value) {
@@ -56,6 +53,13 @@ function getInstagramUrl(value) {
   }
   const handle = input.replace(/^@/, '');
   return /^[a-zA-Z0-9._]+$/.test(handle) ? `https://www.instagram.com/${encodeURIComponent(handle)}/` : '';
+}
+
+function formatPrice(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return '';
+  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
 }
 
 function renderBusiness(business, supabase) {
@@ -79,16 +83,82 @@ function renderBusiness(business, supabase) {
     cover.hidden = false;
   }
 
-  const products = business.business_product_images?.length
-    ? business.business_product_images.map((photo) => ({ src: imageUrl(supabase, photo.image_path), alt: `${business.business_name} product` }))
-    : (business.portfolio || []).map((item) => ({ src: item.image, alt: item.title || `${business.business_name} product` }));
+  const publicProducts = Array.isArray(business.products) && business.products.length
+    ? business.products
+    : [];
+
+  const legacyProductImages = Array.isArray(business.business_product_images) && business.business_product_images.length
+    ? business.business_product_images
+    : [];
+
+  const productItems = [];
+  if (publicProducts.length) {
+    publicProducts.forEach((product) => {
+      const images = Array.isArray(product.business_product_images) ? product.business_product_images : [];
+      const title = product.name || business.business_name;
+      productItems.push({
+        title,
+        description: product.description || '',
+        price: formatPrice(product.price),
+        images: images
+          .map((photo) => ({
+            src: imageUrl(supabase, photo.image_path),
+            alt: `${title} product`
+          }))
+          .filter((item) => item.src)
+      });
+    });
+  }
+
+  if (legacyProductImages.length) {
+    productItems.push({
+      title: 'Product photos',
+      description: '',
+      price: '',
+      images: legacyProductImages
+        .map((photo) => ({
+          src: imageUrl(supabase, photo.image_path),
+          alt: `${business.business_name} product`
+        }))
+        .filter((item) => item.src)
+    });
+  }
+
   const productGrid = document.getElementById('businessProducts');
-  products.filter((item) => item.src).forEach((item) => {
-    const image = document.createElement('img');
-    image.src = item.src;
-    image.alt = item.alt;
-    image.loading = 'lazy';
-    productGrid.append(image);
+  productGrid.replaceChildren();
+  productItems.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'business-product-card';
+    const title = document.createElement('h3');
+    title.className = 'business-product-title';
+    title.textContent = item.title;
+    card.append(title);
+
+    if (item.description) {
+      const description = document.createElement('p');
+      description.className = 'business-product-description';
+      description.textContent = item.description;
+      card.append(description);
+    }
+
+    if (item.price) {
+      const price = document.createElement('p');
+      price.className = 'business-product-price';
+      price.textContent = item.price;
+      card.append(price);
+    }
+
+    const viewButton = document.createElement('button');
+    viewButton.className = 'btn btn-outline-primary business-product-view';
+    viewButton.type = 'button';
+    viewButton.textContent = item.images.length ? 'View item' : 'No photos available';
+    viewButton.disabled = item.images.length === 0;
+    if (item.images.length) {
+      viewButton.setAttribute('aria-label', `View photos for ${item.title}`);
+      viewButton.addEventListener('click', () => openProductViewer(item.images, 0));
+    }
+    card.append(viewButton);
+    productGrid.append(card);
   });
   document.getElementById('productsSection').hidden = productGrid.childElementCount === 0;
 
@@ -98,7 +168,7 @@ function renderBusiness(business, supabase) {
   const entries = [
     location,
     contactAnchor('Phone', `tel:${(business.phone || '').replace(/[^+\d]/g, '')}`, business.phone),
-    contactAnchor('Email', `mailto:${business.email || ''}`, business.email),
+    contactAnchor('Email', `mailto:${(business.email || '').trim()}`, business.email),
     contactAnchor('Instagram', getInstagramUrl(business.instagram), business.instagram, true)
   ].filter(Boolean);
   entries.forEach((entry) => contacts.append(entry));
@@ -115,6 +185,41 @@ function renderBusiness(business, supabase) {
   profile.hidden = false;
 }
 
+function updateProductViewer() {
+  const image = activeProductImages[activeProductImageIndex];
+  productViewerImage.src = image.src;
+  productViewerImage.alt = image.alt;
+  const multipleImages = activeProductImages.length > 1;
+  productViewerPrevious.hidden = !multipleImages;
+  productViewerNext.hidden = !multipleImages;
+}
+
+function openProductViewer(images, index) {
+  activeProductImages = images;
+  activeProductImageIndex = index;
+  updateProductViewer();
+  productViewer.showModal();
+}
+
+productViewerClose.addEventListener('click', () => productViewer.close());
+productViewerPrevious.addEventListener('click', () => {
+  activeProductImageIndex = (activeProductImageIndex - 1 + activeProductImages.length) % activeProductImages.length;
+  updateProductViewer();
+});
+productViewerNext.addEventListener('click', () => {
+  activeProductImageIndex = (activeProductImageIndex + 1) % activeProductImages.length;
+  updateProductViewer();
+});
+productViewer.addEventListener('click', (event) => {
+  if (event.target === productViewer) productViewer.close();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && productViewer.open) {
+    event.preventDefault();
+    productViewer.close();
+  }
+});
+
 async function loadBusiness() {
   const slug = new URLSearchParams(window.location.search).get('slug')?.trim();
   if (!slug) throw new Error('This business link is missing its slug. Return to the directory and choose a business.');
@@ -125,7 +230,21 @@ async function loadBusiness() {
     supabase = await window.supabaseReady;
     const { data, error } = await supabase
       .from('businesses')
-      .select('id, business_name, business_slug, category, description, image_path, whatsapp_number, whatsapp_link, phone, email, location, instagram, business_product_images(image_path)')
+      .select(`
+        id,
+        business_name,
+        business_slug,
+        category,
+        description,
+        image_path,
+        whatsapp_number,
+        phone,
+        email,
+        location,
+        instagram,
+        business_product_images(image_path),
+        products(id, name, description, price, business_product_images(image_path))
+      `)
       .eq('business_slug', slug)
       .maybeSingle();
     if (error) throw error;

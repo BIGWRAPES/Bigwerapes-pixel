@@ -642,8 +642,8 @@ img {
     aspect-ratio: 4 / 3;
   }
 
-  .portfolio-card .image-container {
-    aspect-ratio: 5 / 4;
+  .portfolio .portfolio-card .image-container {
+    aspect-ratio: 3 / 2;
   }
 
   .section {
@@ -3247,4 +3247,24 @@ section,
 --------------------------------------------------------------*/
 .starter-section {
   /* Add your styles here */
+}
+
+@media (max-width: 767.98px) {
+  .portfolio .portfolio-card:hover {
+    transform: none;
+  }
+
+  .portfolio .portfolio-card .content {
+    padding: 12px 8px;
+  }
+
+  .portfolio .portfolio-card .content h3 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .portfolio .portfolio-card .content p {
+    font-size: 12px;
+    line-height: 1.45;
+  }
 }

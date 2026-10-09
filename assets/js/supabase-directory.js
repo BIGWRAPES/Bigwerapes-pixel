@@ -1,16 +1,30 @@
 const directory = document.querySelector('.portfolio-grid');
+const searchInput = document.getElementById('directorySearchInput');
+const searchButton = document.getElementById('directorySearchButton');
+const searchStatus = document.getElementById('directorySearchStatus');
+const defaultBusinessImage = 'assets/img/portfolio/portfolio-3.webp';
+
+function getPublicStorageUrl(supabase, path) {
+  if (!path) return defaultBusinessImage;
+  const { data, error } = supabase.storage.from('business-images').getPublicUrl(path);
+  if (error || !data?.publicUrl) return defaultBusinessImage;
+  return data.publicUrl;
+}
 
 function appendBusinessCard(business, imageUrl) {
   const column = document.createElement('div');
-  column.className = 'col-lg-4 col-md-6 portfolio-item isotope-item';
+  column.className = 'col-6 col-md-4 col-xl-3 portfolio-item isotope-item';
 
   const card = document.createElement('article');
   card.className = 'portfolio-card';
   const image = document.createElement('img');
   image.className = 'img-fluid';
-  image.src = imageUrl || 'assets/img/portfolio/portfolio-3.webp';
+  image.src = imageUrl || defaultBusinessImage;
   image.alt = `${business.business_name} business image`;
   image.loading = 'lazy';
+  const imageContainer = document.createElement('div');
+  imageContainer.className = 'image-container';
+  imageContainer.append(image);
 
   const content = document.createElement('div');
   content.className = 'content';
@@ -61,9 +75,130 @@ function appendBusinessCard(business, imageUrl) {
     });
     content.append(productGallery);
   }
-  card.append(image, content);
+  card.append(imageContainer, content);
   column.append(card);
   directory.append(column);
+}
+
+function createSearchResultCard(row, supabase) {
+  const isProductResult = row.result_type === 'product';
+  const container = document.createElement('div');
+  container.className = 'col-6 col-md-4 col-xl-3 portfolio-item isotope-item';
+
+  const card = document.createElement('article');
+  card.className = 'portfolio-card';
+
+  const image = document.createElement('img');
+  image.className = 'img-fluid';
+  image.loading = 'lazy';
+  const imagePath = isProductResult
+    ? (row.product_image_path || row.business_image_path || row.image_path)
+    : (row.business_image_path || row.image_path);
+  image.src = imagePath ? getPublicStorageUrl(supabase, imagePath) : defaultBusinessImage;
+  image.alt = isProductResult ? (row.product_name || 'Product image') : (row.business_name || 'Business image');
+
+  const imageContainer = document.createElement('div');
+  imageContainer.className = 'image-container';
+  imageContainer.append(image);
+
+  const content = document.createElement('div');
+  content.className = 'content';
+
+  const title = document.createElement('h3');
+  title.textContent = isProductResult ? (row.product_name || row.business_name || 'Product') : (row.business_name || 'Business');
+
+  const meta = document.createElement('p');
+  meta.textContent = isProductResult
+    ? `${row.business_name || 'Business'} • Product`
+    : (row.category || 'Student business');
+
+  const summary = document.createElement('p');
+  summary.textContent = isProductResult
+    ? (row.product_description || row.description || 'Search match from a local business listing.')
+    : (row.description || 'Student business listing.');
+
+  const ownerLink = document.createElement(row.owner_id ? 'a' : 'span');
+  ownerLink.className = 'business-owner-link';
+  if (row.owner_id) {
+    ownerLink.href = `owner-profile.html?owner_id=${encodeURIComponent(row.owner_id)}`;
+  }
+  ownerLink.textContent = row.owner_name || 'Business owner';
+
+  const action = document.createElement('a');
+  action.className = 'btn btn-primary btn-sm mt-3';
+  action.href = row.business_slug ? `business.html?slug=${encodeURIComponent(row.business_slug)}` : 'businesses.html';
+  action.textContent = isProductResult ? 'View Business' : 'View Business';
+
+  if (isProductResult && row.product_price !== null && row.product_price !== undefined && row.product_price !== '') {
+    const price = document.createElement('p');
+    price.style.marginTop = '0.5rem';
+    const numericValue = Number(row.product_price);
+    const formattedPrice = Number.isFinite(numericValue)
+      ? new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(numericValue)
+      : row.product_price;
+    price.textContent = formattedPrice;
+    content.append(title, meta, ownerLink, summary, price, action);
+  } else {
+    content.append(title, meta, ownerLink, summary, action);
+  }
+
+  card.append(imageContainer, content);
+  container.append(card);
+  return container;
+}
+
+async function runDirectorySearch() {
+  if (!directory || !searchInput || !searchButton || !searchStatus) return;
+
+  const term = searchInput.value.trim();
+  if (!term) {
+    searchStatus.textContent = 'Search businesses and products.';
+    return;
+  }
+
+  searchStatus.textContent = 'Searching...';
+  const supabase = await window.supabaseReady;
+  const { data, error } = await supabase.rpc('search_marketplace_directory', {
+    search_text: term,
+    result_limit: 20
+  });
+
+  if (error) {
+    searchStatus.textContent = 'Search is unavailable right now.';
+    console.error('Directory search failed:', error);
+    return;
+  }
+
+  const results = Array.isArray(data) ? data : [];
+  directory.innerHTML = '';
+
+  if (!results.length) {
+    directory.innerHTML = `
+      <div class="col-12 text-center" style="padding: 2rem 0; color: var(--text-secondary, #999);">
+        <i class="bi bi-search" style="font-size: 2rem; display:block; margin-bottom: 0.75rem;"></i>
+        <p>No businesses or products match “${term}”.</p>
+      </div>
+    `;
+    searchStatus.textContent = 'No matches found.';
+    return;
+  }
+
+  results.forEach((row) => {
+    const searchCard = createSearchResultCard(row, supabase);
+    if (searchCard) directory.append(searchCard);
+  });
+
+  searchStatus.textContent = `Showing ${results.length} match${results.length === 1 ? '' : 'es'} for “${term}”.`;
+}
+
+if (searchInput && searchButton) {
+  searchButton.addEventListener('click', runDirectorySearch);
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      runDirectorySearch();
+    }
+  });
 }
 
 if (directory) {

@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       container.innerHTML = businesses.map((business) => {
         const categoryClass = getCategoryClass(business.category || 'default');
         return `
-          <div class="col-lg-4 col-md-6 portfolio-item isotope-item ${categoryClass}">
+          <div class="col-6 col-md-4 col-xl-3 portfolio-item isotope-item ${categoryClass}">
             <div class="portfolio-card" style="cursor: pointer;" data-business-id="${business.id}">
               <div class="image-container">
                 <img src="${business.logo_url || 'assets/img/portfolio/portfolio-3.webp'}" class="img-fluid" alt="${business.business_name}" loading="lazy" onerror="this.src='assets/img/portfolio/portfolio-3.webp'">

@@ -54,9 +54,21 @@
       </select>
       <label class="form-label" for="description">Description</label>
       <textarea class="form-control" id="description" rows="5" maxlength="2000" required></textarea>
+      <label class="form-label" for="businessWhatsAppNumber">WhatsApp number</label>
+      <input class="form-control" id="businessWhatsAppNumber" type="tel" maxlength="40" autocomplete="tel" placeholder="Include country code">
+      <div class="form-text">Optional. Include your international country code. This number will be public.</div>
+      <label class="form-label" for="businessEmail">Business email</label>
+      <input class="form-control" id="businessEmail" type="email" maxlength="254" autocomplete="email">
+      <div class="form-text">Optional. This email address will be public.</div>
       <label class="form-label" for="businessImage">Business image</label>
       <input class="form-control" id="businessImage" type="file" accept="image/jpeg,image/png,image/webp" required>
       <div class="form-text">This is the business cover image. JPG, PNG, or WebP; maximum 5 MB.</div>
+      <label class="form-label" for="productName">Product name</label>
+      <input class="form-control" id="productName" maxlength="120" placeholder="Optional: add a product for this business">
+      <label class="form-label" for="productDescription">Product description</label>
+      <textarea class="form-control" id="productDescription" rows="3" maxlength="1000" placeholder="Optional: add a product description"></textarea>
+      <label class="form-label" for="productPrice">Product price</label>
+      <input class="form-control" id="productPrice" type="number" min="0" step="0.01" placeholder="Optional: set a product price">
       <label class="form-label" for="productImages">Product images</label>
       <input class="form-control" id="productImages" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
       <div class="form-text" id="productImageCount">Select 1 to 15 product images. Each image can be up to 5 MB.</div>
@@ -65,7 +77,7 @@
     </form>
     <section class="mt-5" aria-labelledby="yourBusinessesHeading">
       <h2 id="yourBusinessesHeading" class="h4">Your businesses and product photos</h2>
-      <p class="form-text">You can add or remove individual product photos. Each business can have up to 15.</p>
+      <p class="form-text">You can edit public contact details and add or remove individual product photos. Each business can have up to 15.</p>
       <div id="ownedBusinesses"><p>Loading your businesses...</p></div>
     </section>
     <section class="danger-zone mt-5" aria-labelledby="dangerZoneHeading">
