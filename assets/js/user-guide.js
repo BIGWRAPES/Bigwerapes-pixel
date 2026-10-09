@@ -20,9 +20,9 @@
         <nav class="user-guide-links" aria-label="User guide links">
           <a href="user-guide.html">Read the full user guide</a>
           <a href="businesses.html">Browse businesses</a>
-          <a href="signup.html">Create a student account</a>
+          <a href="signup.html">Create a user account</a>
           <a href="owneresignup.html">Register as a business owner</a>
-          <a href="business-submit.html">List or manage your business</a>
+          <a href="business-submit.html">List or manage your business (entrepreneurs)</a>
           <a href="login.html">Sign in</a>
           <a href="contact.html">Contact BigWrapes Pixel</a>
         </nav>

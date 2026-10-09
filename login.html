@@ -14,13 +14,21 @@
     .auth-panel label { margin-top: 18px; color: var(--heading-color, #fff); }
     .auth-panel button { margin-top: 22px; width: 100%; }
     #authMessage { display: none; margin-top: 16px; }
+    .auth-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 0; color: rgba(255,255,255,.6); font-size: 13px; }
+    .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.16); }
+    .google-oauth-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 46px; margin-top: 12px !important; padding: 10px 16px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: #fff; color: #202124; font-weight: 600; transition: background .2s ease, box-shadow .2s ease; }
+    .google-oauth-button:hover:not(:disabled) { background: #f7f8f8; color: #202124; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+    .google-oauth-button:disabled { opacity: .65; cursor: wait; }
+    .google-oauth-button .bi-google { color: #4285f4; font-size: 18px; }
+    #googleProfileForm[hidden] { display: none; }
+    @media (max-width: 480px) { .auth-panel { padding: 26px 20px; } }
   </style>
   <script type="module" src="assets/js/supabase-client.js"></script>
 </head>
 <body>
   <main class="auth-panel">
     <h1>Welcome back</h1>
-    <p>Sign in to manage your student business.</p>
+    <p>Sign in to explore businesses or manage your entrepreneur account.</p>
     <div id="authMessage" class="alert" role="status" aria-live="polite"></div>
     <form id="loginForm">
       <label class="form-label" for="email">Email address</label>
@@ -28,6 +36,26 @@
       <label class="form-label" for="password">Password</label>
       <input class="form-control" id="password" type="password" autocomplete="current-password" required>
       <button class="btn btn-primary" type="submit" id="loginButton">Sign In</button>
+      <div class="auth-divider" aria-hidden="true">or</div>
+      <button class="google-oauth-button" type="button" data-google-oauth data-error-target="authMessage">
+        <i class="bi bi-google" aria-hidden="true"></i><span>Continue with Google</span>
+      </button>
+    </form>
+    <form id="googleProfileForm" hidden>
+      <p class="mt-3">Complete your profile to continue.</p>
+      <label class="form-label" for="googleFirstName">First name</label>
+      <input class="form-control" id="googleFirstName" autocomplete="given-name" maxlength="100" required>
+      <label class="form-label" for="googleLastName">Last name</label>
+      <input class="form-control" id="googleLastName" autocomplete="family-name" maxlength="100" required>
+      <div id="googleAccountTypeGroup">
+        <label class="form-label" for="googleAccountType">Account type</label>
+        <select class="form-select" id="googleAccountType" required>
+          <option value="">Choose account type</option>
+          <option value="student">User</option>
+          <option value="entrepreneur">Entrepreneur</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="saveGoogleProfileButton" type="submit">Continue</button>
     </form>
     <form id="recoveryForm" hidden>
       <label class="form-label" for="newPassword">New password</label>
@@ -35,9 +63,10 @@
       <button class="btn btn-primary" type="submit">Update password</button>
     </form>
     <p class="mt-3 mb-1"><a href="forgot-password.html">Forgot your password?</a></p>
-    <p class="mb-0">New here? <a href="signup.html">Create a student account</a> or <a href="owneresignup.html">register as an entrepreneur</a>.</p>
+    <p class="mb-0">New here? <a href="signup.html">Create a user account</a> or <a href="owneresignup.html">register as an entrepreneur</a>.</p>
     <p class="mt-3 mb-0"><a href="index.html">Return to home</a></p>
   </main>
+  <script type="module" src="assets/js/google-oauth.js"></script>
   <script type="module" src="assets/js/login.js"></script>
   <script defer src="assets/js/user-guide.js"></script>
 </body>

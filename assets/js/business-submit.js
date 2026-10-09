@@ -29,12 +29,26 @@ async function requireUser() {
     window.location.replace('login.html');
     return null;
   }
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('account_type')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  if (profile?.account_type !== 'entrepreneur') {
+    window.location.replace('businesses.html');
+    return null;
+  }
   currentUser = user;
+  document.getElementById('businessAccessMessage').hidden = true;
+  document.querySelector('.business-panel').hidden = false;
   return user;
 }
 
 const currentUserPromise = requireUser().catch((error) => {
-  showMessage(error.message);
+  const accessMessage = document.getElementById('businessAccessMessage');
+  accessMessage.textContent = `Unable to verify your business dashboard access. Please try again. ${error.message}`;
+  accessMessage.hidden = false;
   return null;
 });
 
@@ -105,7 +119,7 @@ async function saveOwnerProfile(user) {
 function renderSelectedPreviews() {
   productImagePreviews.querySelectorAll('img').forEach((image) => URL.revokeObjectURL(image.src));
   productImagePreviews.replaceChildren();
-  productImageCount.textContent = `${selectedProductImages.length} of ${maxProductImages} product images selected. Each image can be up to 5 MB.`;
+  productImageCount.textContent = `${selectedProductImages.length} of ${maxProductImages} optional product images selected. Each image can be up to 5 MB.`;
 
   selectedProductImages.forEach((file, index) => {
     const preview = document.createElement('div');
@@ -610,8 +624,8 @@ form.addEventListener('submit', async (event) => {
     if (!coverImage || !isValidImage(coverImage)) {
       throw new Error('Choose a JPG, PNG, or WebP cover image no larger than 5 MB.');
     }
-    if (selectedProductImages.length < 1 || selectedProductImages.length > maxProductImages) {
-      throw new Error(`Choose between 1 and ${maxProductImages} product images.`);
+    if (selectedProductImages.length > maxProductImages) {
+      throw new Error(`Choose no more than ${maxProductImages} product images.`);
     }
 
     await saveOwnerProfile(user);

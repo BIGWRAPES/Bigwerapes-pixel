@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account - Bigwrapes-Pixel</title>
+    <title>Create User Account - Bigwrapes-Pixel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/main.css">
@@ -200,6 +200,34 @@
             animation: spin 0.8s linear infinite;
         }
 
+        .google-oauth-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 46px;
+            margin: 0 0 20px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            background: #fff;
+            color: #202124;
+            font-weight: 600;
+            transition: background .2s ease, box-shadow .2s ease;
+        }
+
+        .google-oauth-button:hover:not(:disabled) {
+            background: #f7f8f8;
+            color: #202124;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+        }
+
+        .google-oauth-button:disabled { opacity: .65; cursor: wait; }
+        .google-oauth-button .bi-google { color: #4285f4; font-size: 18px; }
+        .oauth-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: rgba(255, 255, 255, .6); font-size: 13px; }
+        .oauth-divider::before, .oauth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, .16); }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -328,8 +356,8 @@
     <div class="signup-container">
         <div class="signup-card">
             <div class="signup-header">
-                <h1>Create Account</h1>
-                <p>Join Bigwrapes-Pixel and start exploring student businesses</p>
+                <h1>Create User Account</h1>
+                <p>Create a user account to explore businesses. Business management is available to entrepreneur accounts.</p>
             </div>
 
             <div class="alert alert-error" id="errorAlert"></div>
@@ -434,7 +462,11 @@
                     </label>
                 </div>
 
-                <button type="submit" class="signup-btn" id="signupBtn">Create Account</button>
+                <button type="submit" class="signup-btn" id="signupBtn">Create User Account</button>
+                <div class="oauth-divider" aria-hidden="true">or</div>
+                <button type="button" class="google-oauth-button" data-google-oauth data-account-type="student" data-error-target="errorAlert">
+                    <i class="bi bi-google" aria-hidden="true"></i><span>Continue with Google</span>
+                </button>
 
                 <div class="login-link">
                     Already have an account? <a href="login.html">Sign in</a>
@@ -448,6 +480,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="assets/js/supabase-client.js"></script>
+    <script type="module" src="assets/js/google-oauth.js"></script>
     <script>
         // Form Elements
         const signupForm = document.getElementById('signupForm');
@@ -717,7 +750,7 @@
                 showError('An error occurred: ' + error.message + '. Please check your connection and try again.');
                 signupBtn.disabled = false;
                 signupBtn.classList.remove('loading');
-                signupBtn.textContent = 'Create Account';
+                signupBtn.textContent = 'Create User Account';
             }
         });
     </script>

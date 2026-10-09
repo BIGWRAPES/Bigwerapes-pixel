@@ -26,7 +26,8 @@
   <script type="module" src="assets/js/supabase-client.js"></script>
 </head>
 <body>
-  <main class="business-panel">
+  <p id="businessAccessMessage" class="alert alert-warning" role="status" aria-live="polite" hidden></p>
+  <main class="business-panel" hidden>
     <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
       <div><h1>Add your business</h1><p>Share your student business with the community.</p></div>
       <button class="btn btn-outline-secondary" id="signOutButton" type="button">Sign out</button>
@@ -70,8 +71,8 @@
       <label class="form-label" for="productPrice">Product price</label>
       <input class="form-control" id="productPrice" type="number" min="0" step="0.01" placeholder="Optional: set a product price">
       <label class="form-label" for="productImages">Product images</label>
-      <input class="form-control" id="productImages" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
-      <div class="form-text" id="productImageCount">Select 1 to 15 product images. Each image can be up to 5 MB.</div>
+      <input class="form-control" id="productImages" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      <div class="form-text" id="productImageCount">Optional: select up to 15 product images. Each image can be up to 5 MB.</div>
       <div id="productImagePreviews" class="photo-preview-grid" aria-live="polite"></div>
       <button class="btn btn-primary" id="submitBusinessButton" type="submit">Upload and publish</button>
     </form>

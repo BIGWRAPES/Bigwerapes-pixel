@@ -26,7 +26,13 @@ The student and entrepreneur signup pages, login, password reset, business submi
 
 The site is static, so the Supabase SDK is loaded as a browser ES module from `esm.sh`; this lets GitHub Pages run the integration without a server build step. The npm dependency is also installed for local development and future bundling. Open the site through a local web server rather than `file://` so browser modules and relative URLs work correctly.
 
+### Google sign-in and sign-up
+
+Google OAuth buttons on the login, user signup, and entrepreneur signup pages return to `login.html`. In **Supabase > Authentication > URL Configuration**, allow `https://bigwrapes.github.io/Bigwerapes-pixel/login.html` as a redirect URL. For local testing, also allow the exact local callback URL, such as `http://127.0.0.1:8765/login.html`. Enable Google under **Authentication > Providers** and configure its Client ID and Client Secret there; never put the Google Client Secret in browser code. In Google Cloud Console, add the Supabase project's callback URL, `https://ohgzwgeitxigiunxptla.supabase.co/auth/v1/callback`, as an authorized redirect URI. First-time OAuth users complete any missing profile fields after returning to `login.html`; the signup page they started from supplies the user or entrepreneur account type.
+
 New submitted businesses are stored in Supabase and shown alongside the existing manually maintained entries in `assets/data/businesses.json`. The submission form saves the owner's public name, avatar URL, and bio in `business_owner_public_profiles`; public owner cards link to `owner-profile.html?owner_id=...`, which loads that profile and its businesses. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
+
+Regular user accounts keep the existing `student` value in `profiles.account_type` for compatibility, but are labeled **User** in the signup flow and are directed to the business directory after sign-in. Entrepreneur accounts are directed to the business management page, which checks the signed-in user's profile account type before loading dashboard functionality.
 
 ## Business pictures and account deletion
 

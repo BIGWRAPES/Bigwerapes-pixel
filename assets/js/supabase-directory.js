@@ -65,7 +65,7 @@ function appendBusinessCard(business, imageUrl) {
     const productGallery = document.createElement('div');
     productGallery.className = 'business-product-thumbnails';
     productGallery.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-top:12px;';
-    business.business_product_images.forEach((photo, index) => {
+    business.business_product_images.slice(0, 2).forEach((photo, index) => {
       const productImage = document.createElement('img');
       productImage.src = photo.publicUrl;
       productImage.alt = `Product ${index + 1} from ${business.business_name}`;
