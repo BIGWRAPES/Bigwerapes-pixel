@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create and edit draft business content with the BIGWRAPES AI Business Assistant.">
+  <title>AI Business Assistant - Bigwrapes-Pixel</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    body { min-height: 100vh; padding: 32px 16px; background: #101415; }
+    .assistant-panel { width: min(100%, 760px); margin: 0 auto; padding: clamp(20px, 5vw, 36px); background: var(--surface-color, #1b2222); border: 1px solid rgba(0, 136, 112, .35); border-radius: 12px; }
+    .assistant-panel h1, .assistant-panel label { color: var(--heading-color, #fff); }
+    .assistant-panel label { margin-top: 16px; }
+    .assistant-panel button { margin-top: 0; }
+    .assistant-panel .form-text { color: rgba(255, 255, 255, .72); }
+    .assistant-panel .form-control:focus, .assistant-panel .form-select:focus { border-color: var(--accent-color, #008870); box-shadow: 0 0 0 .25rem rgba(0, 136, 112, .25); }
+    .assistant-panel .btn-primary { --bs-btn-bg: var(--accent-color, #008870); --bs-btn-border-color: var(--accent-color, #008870); --bs-btn-hover-bg: #006e5b; --bs-btn-hover-border-color: #006e5b; --bs-btn-active-bg: #005c4c; --bs-btn-active-border-color: #005c4c; }
+    .assistant-panel .btn-outline-primary { --bs-btn-color: var(--accent-color, #008870); --bs-btn-border-color: var(--accent-color, #008870); --bs-btn-hover-bg: var(--accent-color, #008870); --bs-btn-hover-border-color: var(--accent-color, #008870); --bs-btn-active-bg: #006e5b; --bs-btn-active-border-color: #006e5b; }
+    .assistant-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    #aiAssistantMessage { margin-top: 16px; }
+    @media (max-width: 480px) {
+      body { padding: 16px 10px; }
+      .assistant-panel { padding: 20px 16px; }
+      .assistant-actions > button { flex: 1 1 100%; }
+    }
+  </style>
+  <script type="module" src="assets/js/supabase-client.js"></script>
+</head>
+<body>
+  <p id="aiAssistantAccessMessage" class="alert alert-warning" role="status" aria-live="polite">Verifying your business-assistant access…</p>
+  <main id="aiAssistantPage" class="assistant-panel" hidden>
+    <header class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div>
+        <p class="text-uppercase small mb-2">BIGWRAPES-PIXEL</p>
+        <h1 class="h2">AI Business Assistant</h1>
+        <p>Create draft content for your business. Nothing is saved or published automatically.</p>
+      </div>
+      <a class="btn btn-outline-primary" href="business-submit.html">Business dashboard</a>
+    </header>
+
+    <p class="form-text">AI generation is not configured yet. When enabled, only the content details you enter here will be sent to the selected provider. Do not enter passwords, access tokens, or sensitive personal information.</p>
+    <form id="aiAssistantForm">
+      <label class="form-label" for="aiAction">Choose what to create</label>
+      <select class="form-select" id="aiAction" required>
+        <option value="">Choose a content type</option>
+        <option value="product_description">Product description</option>
+        <option value="business_description">Business description</option>
+        <option value="social_caption">Social media caption</option>
+        <option value="whatsapp_message">WhatsApp promotional message</option>
+      </select>
+
+      <div id="aiProductFields" hidden>
+        <label class="form-label" for="aiProductName">Product name</label>
+        <input class="form-control" id="aiProductName" maxlength="120" autocomplete="off">
+        <label class="form-label" for="aiProductFacts">Factual product details</label>
+        <textarea class="form-control" id="aiProductFacts" rows="4" maxlength="1000" placeholder="Include only facts you can verify, such as features, materials, and intended use."></textarea>
+      </div>
+
+      <div id="aiBusinessFields" hidden>
+        <label class="form-label" for="aiBusinessDescription">Current business description</label>
+        <textarea class="form-control" id="aiBusinessDescription" rows="5" maxlength="2000" placeholder="Enter the description you want to improve."></textarea>
+      </div>
+
+      <div id="aiPromotionFields" hidden>
+        <label class="form-label" for="aiPromotionDetails">Promotion details</label>
+        <textarea class="form-control" id="aiPromotionDetails" rows="4" maxlength="500" placeholder="Describe the actual promotion, product, and any real dates or conditions."></textarea>
+      </div>
+
+      <div class="assistant-actions">
+        <button class="btn btn-primary" id="aiGenerateButton" type="submit">Generate draft</button>
+      </div>
+    </form>
+
+    <div id="aiAssistantMessage" class="alert" role="status" aria-live="polite" hidden></div>
+
+    <section id="aiResultPanel" class="mt-4" aria-labelledby="aiResultHeading" hidden>
+      <h2 id="aiResultHeading" class="h5">Review and edit your draft</h2>
+      <label class="form-label" for="aiResult">Generated text</label>
+      <textarea class="form-control" id="aiResult" rows="7" maxlength="8000"></textarea>
+      <div class="assistant-actions">
+        <button class="btn btn-outline-primary" id="aiRegenerateButton" type="button">Regenerate</button>
+        <button class="btn btn-outline-primary" id="aiCopyButton" type="button">Copy text</button>
+        <button class="btn btn-outline-primary" id="aiInsertButton" type="button" hidden>Send to business form</button>
+      </div>
+      <p id="aiCopyOnlyHelp" class="form-text mt-2" hidden>This content type has no matching field in the business form. Copy the draft to use it elsewhere.</p>
+      <p class="form-text mt-2">Sending a product or business description returns to the dashboard. If the matching field already contains text, you will be asked before it is replaced. The form is not submitted automatically.</p>
+    </section>
+
+    <p class="mt-4 mb-0"><a href="business-submit.html">Back to business dashboard</a></p>
+  </main>
+  <script type="module" src="assets/js/ai-business-assistant.js"></script>
+</body>
+</html>

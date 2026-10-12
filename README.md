@@ -34,6 +34,90 @@ New submitted businesses are stored in Supabase and shown alongside the existing
 
 Regular user accounts keep the existing `student` value in `profiles.account_type` for compatibility, but are labeled **User** in the signup flow and are directed to the business directory after sign-in. Entrepreneur accounts are directed to the business management page, which checks the signed-in user's profile account type before loading dashboard functionality.
 
+## BIGWRAPES AI Business Assistant (Cloudflare Workers AI adapter)
+
+The assistant UI is on the separate `ai-assistant.html` page. The entrepreneur business-management page links to it; the page independently checks the Supabase session and entrepreneur account type. The Edge Function repeats those checks and rejects unauthenticated and non-entrepreneur callers, so the page guard is not the only authorization control. It supports product descriptions, social captions, WhatsApp messages, and business-description improvements. Generated text stays editable. Users can copy the result or send product/business-description drafts back to the dashboard, where existing text requires confirmation before replacement. Draft transfer uses tab-scoped `sessionStorage`, is bound to the authenticated user, and is never submitted automatically.
+
+The server-side provider adapter in `supabase/functions/ai-business-assistant/provider.ts` targets Cloudflare Workers AI and returns no provider until both server environment values are configured. The Edge Function therefore returns an explicit `503` if the provider is not configured; it does not pretend generation worked. Do not put provider credentials in browser files, public environment variables, or committed files. Send only the content the user enters for the requested draft; never send passwords, session/access tokens, or unrelated profile fields.
+
+### Provider choice and terms
+
+Gemini has been ruled out for this student-facing site: Google's [terms](https://ai.google.dev/gemini-api/terms) disallow API clients directed to or likely to be accessed by under-18s, require paid service for users in the EEA, Switzerland, or UK, and allow unpaid-tier prompts/outputs to be used to improve products and potentially reviewed by people. This site does not impose the age and region restrictions needed for Gemini.
+
+The recommended candidate is [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/) using the currently listed text model `@cf/qwen/qwen3-30b-a3b-fp8`. Cloudflare documents a free-plan allowance of 10,000 Neurons per account per UTC day. This allowance is shared across requests and models, can be exhausted, and is not unlimited. On the free plan, requests fail when the allocation is exceeded; on a paid Workers plan, usage above the allowance is currently billed at $0.011 per 1,000 Neurons. Keep the account on the free plan if avoiding charges is required, and monitor usage.
+
+Cloudflare says Workers AI inputs and outputs are customer content, are not exposed to other Cloudflare customers, and are not used to train/improve models or services; they may be stored if combined with a separate Cloudflare storage service. Cloudflare's general agreement grants processing rights as necessary to provide the service and makes the customer responsible for rights, permissions, and legal compliance. The adapter does not use Cloudflare storage. Review the applicable [data-usage terms](https://developers.cloudflare.com/workers-ai/platform/data-usage/), [Cloudflare service agreement](https://www.cloudflare.com/terms/), and the model's license before production use. The official material reviewed did not surface Gemini's explicit under-18 restriction for Workers AI; that is not legal advice or a blanket compliance determination. No provider credential is configured, and no live AI request has been made.
+
+### Backend security design
+
+The Edge Function verifies the bearer access token with Supabase Auth, reads only `profiles.account_type`, and requires `entrepreneur`. It accepts only four action names and validates non-empty, bounded text fields (maximum body 8 KiB; field caps are in `index.ts`). It never uses an admin/service-role key. The provider adapter is server-side, uses an account-scoped Cloudflare token, bounds provider responses, and receives a timeout `AbortSignal`; the function maps failures to safe client messages and does not log prompts, provider responses, or credentials. Generated text is returned to the browser only, not stored in the database. CORS is not an authorization mechanism; the verified caller and account checks are.
+
+The rate-limit SQL uses a per-user row lock to serialize concurrent requests, then counts an event ledger inside the trailing one-hour interval (maximum 10). The quota RPC rechecks the entrepreneur profile even if called directly, derives identity from `auth.uid()`, uses `SECURITY DEFINER` with an empty search path, has RLS enabled on private tables, revokes direct table access, and grants function execution only to `authenticated`. If upgrading from the earlier fixed-window migration, the SQL conservatively seeds recent old counts. This is a code review, not a substitute for testing against a local PostgreSQL/Supabase instance.
+
+### Local validation (does not change the live project)
+
+Install Deno, Supabase CLI, and PostgreSQL's `psql` client. From the repository root, run:
+
+```powershell
+deno check supabase/functions/ai-business-assistant/index.ts
+deno check supabase/functions/ai-business-assistant/provider.ts
+supabase start
+psql "<LOCAL_SUPABASE_DB_URL>" -v ON_ERROR_STOP=1 -f supabase/ai-assistant-rate-limit.sql
+```
+
+Use only the local database URL printed by `supabase start`; do not substitute a production connection string. Verify grants and RLS in that local database:
+
+```sql
+select
+  has_function_privilege('anon', 'public.consume_ai_generation_quota()', 'EXECUTE') as anon_can_execute,
+  has_function_privilege('authenticated', 'public.consume_ai_generation_quota()', 'EXECUTE') as authenticated_can_execute,
+  has_table_privilege('anon', 'public.ai_generation_requests', 'SELECT') as anon_can_read_ledger,
+  has_table_privilege('authenticated', 'public.ai_generation_requests', 'SELECT') as user_can_read_ledger;
+
+select c.relname, c.relrowsecurity
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public'
+  and c.relname in ('ai_generation_limits', 'ai_generation_requests');
+```
+
+Expected values are `false, true, false, false` and RLS enabled for both tables. In a disposable local project with test users, verify 10 successful quota calls, denial on the 11th, expiry of a request after one hour, independent user quotas, concurrent requests, direct calls by students, and anonymous calls. This migration has not been executed here or against a live project. Review and back up before manually applying it anywhere else.
+
+For local AI testing, create a private environment file **outside the repository** (for example `C:\Users\<YOU>\.config\bigwrapes-ai\provider.env`) containing:
+
+```text
+CLOUDFLARE_ACCOUNT_ID=<your Cloudflare account ID>
+CLOUDFLARE_API_TOKEN=<your scoped Workers AI token>
+```
+
+Create a Cloudflare API token limited to the Workers AI permissions in Cloudflare's [REST API setup guide](https://developers.cloudflare.com/workers-ai/get-started/rest-api/). Do not paste a real token into chat, source files, or command line. Store it locally using the Supabase CLI:
+
+```powershell
+supabase start
+supabase functions serve ai-business-assistant --env-file "<PRIVATE_ENV_FILE>"
+```
+
+For the remote project, only after reviewing terms, verifying the free account/budget settings, testing locally, and receiving explicit approval, configure the secrets and deploy manually:
+
+```powershell
+supabase secrets set --env-file "<PRIVATE_ENV_FILE>" --project-ref <PROJECT_REF>
+supabase functions deploy ai-business-assistant --project-ref <PROJECT_REF>
+```
+
+Use an environment file containing only Edge Function values; never include `VITE_*`, `PUBLIC_*`, or browser configuration. Verify `<PRIVATE_ENV_FILE>` is outside the repository or ignored and never run commands with literal token values. Neither command has been run.
+
+### Manual test plan
+
+1. With a local/deployed test environment and a configured Workers AI test token, an authenticated entrepreneur should generate each of the four action types.
+2. A logged-out request must return `401`; a signed-in student must receive `403`, including when calling the function endpoint or quota RPC directly.
+3. Test malformed JSON, empty text, unsupported actions, over-length fields, and bodies over 8 KiB. They must be rejected without contacting the provider.
+4. Make the mock provider return timeout, `429`, invalid JSON, an error body containing sensitive details, and empty output. The client should receive only safe messages; secrets and prompts must not be logged or returned.
+5. Test ten allowed requests and an eleventh denied request within the same trailing hour, a request after the oldest event expires, parallel requests, and separate users.
+6. On the page, confirm generated text is editable/copyable and no output is written automatically to the database.
+7. Real AI generation remains untested and unavailable until a provider is selected, reviewed for age/geography/privacy, implemented, and configured.
+
+Beginner glossary: the **model** produces text; the **API** is how the server asks it for text; the **Edge Function** authenticates and validates the request without exposing credentials; the **API key** is the provider credential stored only on that server boundary. The app's Supabase publishable key is designed to be public and is not an AI provider key.
+
 ## Business pictures and account deletion
 
 On the signed-in business page, each business has controls to change or delete its cover picture. Replacements upload a new file first, switch `businesses.image_path` only after upload succeeds, and then try to remove the old file. Removing a picture clears `image_path` and displays the site default image. Both operations use the existing `business-images` bucket and the authenticated owner's Storage policies.

@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <div class="content">
-                <h3>${business.business_name}</h3>
+                <h2>${business.business_name}</h2>
                 <p><strong>${business.owner_name}</strong> · ${business.category}</p>
                 <div class="business-meta" style="font-size: 0.9rem; color: var(--text-secondary, #999); margin-top: 0.5rem;">
                   <span><i class="bi bi-star-fill" style="color: var(--accent-color, #008870);"></i> ${business.rating || 'N/A'}</span>

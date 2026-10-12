@@ -163,7 +163,7 @@ h6 {
   margin-right: 0;
 }
 
-.header .logo h1 {
+.header .logo .brand-name {
   display: flex;
   align-items: baseline;
   gap: 5px;
@@ -829,6 +829,7 @@ section,
   position: relative;
 }
 
+.section-title h1,
 .section-title h2 {
   font-size: 32px;
   font-weight: 700;
@@ -859,6 +860,7 @@ section,
 }
 
 @media (max-width: 575px) {
+  .section-title h1,
   .section-title h2 {
     font-size: 28px;
     margin-bottom: 15px;
@@ -1135,6 +1137,7 @@ section,
   color: var(--contrast-color);
 }
 
+.hero .hero-stats .stat-item h2,
 .hero .hero-stats .stat-item h3 {
   font-size: 2.5rem;
   font-weight: 800;
@@ -1144,6 +1147,7 @@ section,
 }
 
 @media (max-width: 768px) {
+  .hero .hero-stats .stat-item h2,
   .hero .hero-stats .stat-item h3 {
     font-size: 2rem;
   }
@@ -1304,6 +1308,7 @@ section,
   transform: translateY(-5px);
 }
 
+.about .content .features-list .feature-item .text h3,
 .about .content .features-list .feature-item .text h4 {
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
@@ -1497,6 +1502,7 @@ section,
   z-index: 2;
 }
 
+.services .cta-wrapper .cta-box .cta-content h2,
 .services .cta-wrapper .cta-box .cta-content h3 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -1941,6 +1947,7 @@ section,
   visibility: visible;
 }
 
+.portfolio .portfolio-card:hover .content h2,
 .portfolio .portfolio-card:hover .content h3 {
   color: var(--accent-color);
 }
@@ -2010,6 +2017,7 @@ section,
   text-align: center;
 }
 
+.portfolio .content h2,
 .portfolio .content h3 {
   font-size: 20px;
   font-weight: 400;
@@ -2109,6 +2117,7 @@ section,
   opacity: 1;
 }
 
+.team .team-member:hover .member-info h3,
 .team .team-member:hover .member-info h4 {
   color: var(--accent-color);
 }
@@ -2197,6 +2206,7 @@ section,
   border-radius: 2px;
 }
 
+.team .member-info h3,
 .team .member-info h4 {
   font-size: 22px;
   font-weight: 600;
@@ -2235,6 +2245,7 @@ section,
     padding: 20px 15px 25px;
   }
 
+  .team .team-member .member-info h3,
   .team .team-member .member-info h4 {
     font-size: 20px;
   }
@@ -2564,6 +2575,7 @@ section,
   margin-bottom: 30px;
 }
 
+.contact .contact-info-panel .contact-info-header h2,
 .contact .contact-info-panel .contact-info-header h3 {
   font-size: 28px;
   font-weight: 700;
@@ -2622,6 +2634,7 @@ section,
   color: var(--contrast-color);
 }
 
+.contact .info-card .card-content h3,
 .contact .info-card .card-content h4 {
   font-size: 16px;
   font-weight: 600;
@@ -2639,6 +2652,7 @@ section,
   margin-top: 35px;
 }
 
+.contact .social-links-panel h3,
 .contact .social-links-panel h5 {
   font-size: 18px;
   font-weight: 600;
@@ -3258,6 +3272,7 @@ section,
     padding: 12px 8px;
   }
 
+  .portfolio .portfolio-card .content h2,
   .portfolio .portfolio-card .content h3 {
     font-size: 16px;
     line-height: 1.3;

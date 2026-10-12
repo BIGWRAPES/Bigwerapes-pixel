@@ -9,11 +9,51 @@ const productViewerPrevious = document.getElementById('productViewerPrevious');
 const productViewerNext = document.getElementById('productViewerNext');
 let activeProductImages = [];
 let activeProductImageIndex = 0;
+const canonicalSiteUrl = 'https://bigwrapes-pixel.online/';
 
 function showError(text) {
   message.textContent = text;
   message.className = 'alert alert-warning';
   message.hidden = false;
+}
+
+function metadataText(value) {
+  if (typeof value !== 'string') return '';
+  const text = value.replace(/\s+/g, ' ').trim();
+  return /^(undefined|null)$/i.test(text) ? '' : text;
+}
+
+function truncateMetadata(value, maxLength) {
+  if (value.length <= maxLength) return value;
+  const contentLimit = maxLength - 1;
+  const truncated = value.slice(0, contentLimit + 1);
+  const wordBoundary = truncated.lastIndexOf(' ');
+  const content = (wordBoundary > 0 ? truncated.slice(0, wordBoundary) : value.slice(0, contentLimit))
+    .trim()
+    .replace(/[.,;:!?]+$/, '');
+  return `${content}…`;
+}
+
+function setMetaContent(selector, value) {
+  let element = document.querySelector(selector);
+  if (!element) {
+    const attribute = selector.match(/^meta\[(name|property)="([^"]+)"\]$/);
+    if (!attribute) return;
+    element = document.createElement('meta');
+    element.setAttribute(attribute[1], attribute[2]);
+    document.head.append(element);
+  }
+  element.content = value;
+}
+
+function setCanonicalUrl(url) {
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.append(canonical);
+  }
+  canonical.href = url;
 }
 
 function imageUrl(supabase, path) {
@@ -62,16 +102,39 @@ function formatPrice(value) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(amount);
 }
 
-function renderBusiness(business, supabase) {
-  document.title = `${business.business_name} - BigWrapes Pixel`;
-  document.querySelector('meta[name="description"]').content =
-    `${business.business_name} - ${business.category}. ${business.description || 'Discover this student-run business on BigWrapes Pixel.'}`.slice(0, 160);
-  document.querySelector('meta[property="og:title"]').content = document.title;
-  document.querySelector('meta[property="og:description"]').content = document.querySelector('meta[name="description"]').content;
+function renderBusiness(business, supabase, requestedSlug) {
+  const businessName = metadataText(business.business_name) || 'Student Business';
+  const category = metadataText(business.category);
+  const businessDescription = metadataText(business.description);
+  const visibleDescription = businessDescription ? business.description.trim() : '';
+  const title = truncateMetadata(`${businessName} | Bigwrapes Pixel`, 70);
+  const description = truncateMetadata([
+    businessName,
+    category,
+    businessDescription || 'Discover this student-run business on Bigwrapes Pixel.'
+  ].filter(Boolean).join(' | '), 160);
+  document.title = title;
+  setMetaContent('meta[name="description"]', description);
+  setMetaContent('meta[property="og:title"]', title);
+  setMetaContent('meta[property="og:description"]', description);
+  setMetaContent('meta[name="twitter:title"]', title);
+  setMetaContent('meta[name="twitter:description"]', description);
 
-  document.getElementById('businessName').textContent = business.business_name;
-  document.getElementById('businessCategory').textContent = business.category || '';
-  document.getElementById('businessDescription').textContent = business.description || '';
+  const businessSlug = metadataText(business.business_slug);
+  if (
+    requestedSlug
+    && requestedSlug === businessSlug
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(businessSlug)
+  ) {
+    const profileUrl = new URL('business.html', canonicalSiteUrl);
+    profileUrl.searchParams.set('slug', businessSlug);
+    setCanonicalUrl(profileUrl.href);
+    setMetaContent('meta[property="og:url"]', profileUrl.href);
+  }
+
+  document.getElementById('businessName').textContent = businessName;
+  document.getElementById('businessCategory').textContent = category;
+  document.getElementById('businessDescription').textContent = visibleDescription;
 
   const cover = document.getElementById('businessCover');
   const coverUrl = business.image_path
@@ -79,8 +142,19 @@ function renderBusiness(business, supabase) {
     : business.cover_image_url || business.logo_url || '';
   if (coverUrl) {
     cover.src = coverUrl;
-    cover.alt = `${business.business_name} cover`;
+    cover.alt = `${businessName} cover`;
     cover.hidden = false;
+    try {
+      const shareImageUrl = new URL(coverUrl, canonicalSiteUrl);
+      if (shareImageUrl.protocol === 'https:') {
+        setMetaContent('meta[property="og:image"]', shareImageUrl.href);
+        setMetaContent('meta[property="og:image:alt"]', `${businessName} cover image`);
+        setMetaContent('meta[name="twitter:image"]', shareImageUrl.href);
+        setMetaContent('meta[name="twitter:image:alt"]', `${businessName} cover image`);
+      }
+    } catch {
+      // Keep the verified site logo as the share image when a cover URL is malformed.
+    }
   }
 
   const publicProducts = Array.isArray(business.products) && business.products.length
@@ -95,7 +169,7 @@ function renderBusiness(business, supabase) {
   if (publicProducts.length) {
     publicProducts.forEach((product) => {
       const images = Array.isArray(product.business_product_images) ? product.business_product_images : [];
-      const title = product.name || business.business_name;
+      const title = metadataText(product.name) || businessName;
       productItems.push({
         title,
         description: product.description || '',
@@ -118,7 +192,7 @@ function renderBusiness(business, supabase) {
       images: legacyProductImages
         .map((photo) => ({
           src: imageUrl(supabase, photo.image_path),
-          alt: `${business.business_name} product`
+          alt: `${businessName} product`
         }))
         .filter((item) => item.src)
     });
@@ -249,7 +323,7 @@ async function loadBusiness() {
       .maybeSingle();
     if (error) throw error;
     if (data) {
-      renderBusiness(data, supabase);
+      renderBusiness(data, supabase, slug);
       return;
     }
   } catch (error) {
@@ -261,7 +335,7 @@ async function loadBusiness() {
   const businesses = await response.json();
   const business = businesses.find((item) => item.business_slug === slug);
   if (business) {
-    renderBusiness(business, null);
+    renderBusiness(business, null, slug);
     return;
   }
   if (queryError) throw queryError;

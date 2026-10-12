@@ -28,7 +28,7 @@ function appendBusinessCard(business, imageUrl) {
 
   const content = document.createElement('div');
   content.className = 'content';
-  const title = document.createElement('h3');
+  const title = document.createElement('h2');
   title.textContent = business.business_name;
   const category = document.createElement('p');
   category.textContent = business.category;

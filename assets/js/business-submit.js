@@ -12,6 +12,7 @@ const defaultBusinessImage = 'assets/img/portfolio/portfolio-1.webp';
 const maxProductImages = 15;
 const maxImageBytes = 5 * 1024 * 1024;
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+const assistantDraftStorageKey = 'bigwrapesAiAssistantDraft';
 let selectedProductImages = [];
 let currentUser;
 let supabase;
@@ -43,6 +44,42 @@ async function requireUser() {
   document.getElementById('businessAccessMessage').hidden = true;
   document.querySelector('.business-panel').hidden = false;
   return user;
+}
+
+function applyAssistantDraft(user) {
+  let draft;
+  try {
+    const storedDraft = sessionStorage.getItem(assistantDraftStorageKey);
+    if (!storedDraft) return;
+    sessionStorage.removeItem(assistantDraftStorageKey);
+    draft = JSON.parse(storedDraft);
+  } catch {
+    showMessage('The assistant draft could not be read. Copy the draft from the assistant page and try again.');
+    return;
+  }
+
+  const target = draft?.action === 'product_description'
+    ? document.getElementById('productDescription')
+    : draft?.action === 'business_description'
+      ? document.getElementById('description')
+      : null;
+  if (!target || draft.ownerId !== user.id || typeof draft.text !== 'string' || !draft.text.trim()) {
+    showMessage('The assistant draft was invalid or expired. Please generate it again.');
+    return;
+  }
+  if (draft.text.length > Number(target.maxLength)) {
+    showMessage(`The assistant draft exceeds this form field's ${target.maxLength}-character limit. Shorten it on the assistant page and try again.`);
+    return;
+  }
+  if (target.value.trim() && !window.confirm('Replace the existing text in this form field with the assistant draft?')) {
+    showMessage('Your existing text was kept. The assistant draft was not inserted.', 'info');
+    return;
+  }
+
+  target.value = draft.text.trim();
+  target.dispatchEvent(new Event('input', { bubbles: true }));
+  showMessage('Assistant draft added to the form. Review it before saving or publishing.', 'success');
+  target.focus();
 }
 
 const currentUserPromise = requireUser().catch((error) => {
@@ -540,6 +577,7 @@ async function loadOwnedBusinesses() {
 
 currentUserPromise.then((user) => {
   if (!user) return;
+  applyAssistantDraft(user);
   supabase
     .from('business_owner_public_profiles')
     .select('owner_name, owner_avatar_url, owner_bio')
