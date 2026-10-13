@@ -1,4 +1,4 @@
-# Nexa Duplicate for GitHub Pages
+# BigWrapes Pixel Website
 
 This folder is a static-only version of the site intended for GitHub Pages deployment.
 

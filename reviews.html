@@ -9,8 +9,6 @@
   <meta name="keywords" content="customer reviews, testimonials, student businesses">
 
   <!-- Favicons -->
-  <link href="assets/img/bigwrapes-pixel-mark.svg" rel="icon" type="image/svg+xml">
-  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -26,6 +24,9 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/reviews.css" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="256x256" href="/assets/img/bigwrapes-pixel-mark.png">
+  <link rel="apple-touch-icon" href="/assets/img/bigwrapes-pixel-mark.png">
 </head>
 
 <body class="reviews-page">
@@ -62,22 +63,89 @@
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials section light-background">
-
-      <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <span class="description-title">Testimonials</span>
         <h2>What Our Customers Say</h2>
-        <p>Customer reviews will be published here after genuine submissions are received.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="text-center py-5">
-          <i class="bi bi-chat-square-text display-4" aria-hidden="true"></i>
-          <p class="mt-3 mb-0">No customer reviews have been added yet.</p>
-        </div>
-
+        <p class="reviews-intro">Read first-hand experiences from customers and student entrepreneurs. New reviews appear as soon as they are submitted.</p>
+        <a class="btn btn-primary mt-3" href="#submit-review"><i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Write a review</a>
       </div>
 
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div id="reviewsOverview" class="reviews-overview" hidden aria-live="polite">
+          <div class="reviews-average">
+            <span id="reviewsAverage" class="reviews-average-value">�</span>
+            <span id="reviewsAverageStars" class="reviews-stars" aria-label="Average rating"></span>
+          </div>
+          <p id="reviewsCount" class="reviews-count mb-0"></p>
+        </div>
+
+        <div class="reviews-toolbar">
+          <h2>Customer experiences</h2>
+          <label class="visually-hidden" for="reviewsBusinessFilter">Filter reviews by business</label>
+          <select id="reviewsBusinessFilter" class="form-select" aria-label="Filter reviews by business" style="max-width: 280px;" hidden>
+            <option value="all">All reviews</option>
+          </select>
+        </div>
+
+        <div id="reviewsList" class="reviews-list" aria-live="polite"></div>
+        <div id="reviewsEmpty" class="review-empty" hidden>
+          <i class="bi bi-chat-square-heart" aria-hidden="true"></i>
+          <h3 class="h5 mt-3">No published reviews yet</h3>
+          <p class="mb-0">Be the first to share an honest experience. Your review will appear as soon as you submit it.</p>
+        </div>
+        <p id="reviewsLoadStatus" class="reviews-status text-center mt-3" role="status" aria-live="polite"></p>
+
+        <section id="submit-review" class="review-form-panel" aria-labelledby="reviewFormHeading">
+          <h2 id="reviewFormHeading">Share your experience</h2>
+          <p>Tell the community what your experience was like. Your name and review will be visible publicly as soon as you submit.</p>
+          <form id="customerReviewForm">
+            <div class="mb-3">
+              <label class="form-label" for="reviewerName">Your name</label>
+              <input class="form-control" id="reviewerName" name="reviewer_name" autocomplete="name" minlength="2" maxlength="80" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="reviewBusinessScope">What is this review about?</label>
+              <select class="form-select" id="reviewBusinessScope" required>
+                <option value="platform">BigWrapes Pixel overall</option>
+                <option value="specific">Specific business</option>
+              </select>
+            </div>
+            <div id="specificBusinessField" class="mb-3" hidden>
+              <label class="form-label" for="reviewBusiness">Choose a business</label>
+              <select class="form-select" id="reviewBusiness" name="business_id" disabled>
+                <option value="">Choose a business</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="reviewRating">Your rating</label>
+              <select class="form-select" id="reviewRating" name="rating" required>
+                <option value="">Choose a rating</option>
+                <option value="5">5 stars - Excellent</option>
+                <option value="4">4 stars - Very good</option>
+                <option value="3">3 stars - Good</option>
+                <option value="2">2 stars - Fair</option>
+                <option value="1">1 star - Poor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="reviewText">Your review</label>
+              <textarea class="form-control" id="reviewText" name="review_text" minlength="20" maxlength="1500" rows="5" required aria-describedby="reviewTextHelp"></textarea>
+              <div id="reviewTextHelp" class="form-text">Write at least 20 characters. Please don�t include private contact or payment information.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="reviewSourceUrl">Link to the original review (optional)</label>
+              <input class="form-control" id="reviewSourceUrl" name="source_url" type="url" inputmode="url" placeholder="https://" aria-describedby="reviewSourceHelp">
+              <div id="reviewSourceHelp" class="form-text">If this review is also published elsewhere, add a link so readers can verify its source.</div>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" id="reviewDisplayConsent" name="display_name_consent" type="checkbox" required>
+              <label class="form-check-label" for="reviewDisplayConsent">I agree that my name and review will be published publicly as soon as I submit.</label>
+            </div>
+            <button id="submitReviewButton" class="btn btn-primary" type="submit"><i class="bi bi-send me-2" aria-hidden="true"></i>Submit for review</button>
+            <p id="reviewSubmitStatus" class="reviews-status mt-3 mb-0" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </div>
     </section><!-- /Testimonials Section -->
 
   </main>
@@ -158,6 +226,7 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
+  <script type="module" src="assets/js/reviews.js"></script>
   <script defer src="assets/js/user-guide.js"></script>
 </body>
 
