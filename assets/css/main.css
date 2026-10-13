@@ -439,6 +439,12 @@ h6 {
     overflow: hidden;
   }
 
+  /* Keep the open menu attached to the viewport when the page is scrolled. */
+  .mobile-nav-active .header {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
   .mobile-nav-active .mobile-nav-toggle {
     color: #fff;
     position: absolute;
@@ -453,12 +459,19 @@ h6 {
     position: fixed;
     overflow: hidden;
     inset: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
     background: rgba(33, 37, 41, 0.8);
     transition: 0.3s;
   }
 
   .mobile-nav-active .navmenu>ul {
     display: block;
+    position: fixed;
+    inset: 72px 16px 16px;
+    max-height: calc(100vh - 88px);
+    max-height: calc(100dvh - 88px);
+    overscroll-behavior: contain;
   }
 }
 
@@ -3282,4 +3295,33 @@ section,
     font-size: 12px;
     line-height: 1.45;
   }
+}
+
+/* Small-screen usability refinements shared across the site. */
+@media (max-width: 767.98px) {
+  .section,
+  section { padding-top: 44px; padding-bottom: 44px; }
+  .section-title { padding: 18px 0; margin-bottom: 20px; }
+  .mobile-nav-toggle { display: grid; place-items: center; width: 44px; height: 44px; margin-right: 0; font-size: 26px; }
+  .mobile-nav-active .mobile-nav-toggle { display: grid; place-items: center; width: 44px; height: 44px; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right)); }
+  .hero { min-height: auto; padding: 88px 0 38px; }
+  .hero .hero-content, .hero .hero-image-container { margin-bottom: 1.5rem; }
+  .hero .hero-content h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); margin-bottom: 1rem; }
+  .hero .hero-content p { font-size: 1rem; margin-bottom: 1.25rem; }
+  .hero .hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .hero .hero-stats .stat-item { padding: 1rem .65rem; }
+  .hero .hero-stats .stat-item .stat-icon { width: 44px; height: 44px; margin-bottom: .6rem; }
+  .hero .hero-stats .stat-item h2, .hero .hero-stats .stat-item h3 { font-size: 1.55rem; }
+  .hero .hero-stats .stat-item p { font-size: .8rem; line-height: 1.35; }
+  .auth-panel.auth-panel, .business-panel.business-panel, .signup-card.signup-card { padding: 24px 18px; }
+  .auth-panel .form-control, .auth-panel .form-select, .business-panel .form-control, .business-panel .form-select, .signup-card .form-control, .signup-card .form-select, .contact .form-control, .contact .form-select { min-height: 48px; font-size: 16px; }
+  .auth-panel button, .business-panel form > button, .signup-card button, .contact .btn { min-height: 48px; }
+}
+
+@media (max-width: 380px) {
+  .hero .hero-stats { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

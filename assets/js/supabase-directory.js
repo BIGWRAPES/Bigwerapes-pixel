@@ -202,12 +202,8 @@ if (searchInput && searchButton) {
 }
 
 if (directory) {
-  const staticDirectoryReady = directory.dataset.staticLoaded === 'true'
-    ? Promise.resolve()
-    : new Promise((resolve) => directory.addEventListener('static-businesses-loaded', resolve, { once: true }));
-
-  Promise.all([window.supabaseReady, staticDirectoryReady])
-    .then(([supabase]) =>
+  window.supabaseReady
+    .then((supabase) =>
       supabase
         .from('businesses')
         .select('id, owner_id, business_name, business_slug, category, description, image_path, created_at, business_product_images(image_path)')
@@ -215,7 +211,13 @@ if (directory) {
     )
     .then(({ data, error }) => {
       if (error) throw error;
-      if (!data.length) return;
+      if (!data.length) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'col-12 text-center py-5';
+        emptyState.textContent = 'No businesses have been listed yet.';
+        directory.replaceChildren(emptyState);
+        return;
+      }
 
       return window.supabaseReady.then((supabase) => {
         const ownerIds = [...new Set(data.map((business) => business.owner_id).filter(Boolean))];
@@ -242,5 +244,9 @@ if (directory) {
     })
     .catch((error) => {
       console.info('Supabase business listings are unavailable:', error.message);
+      const errorState = document.createElement('div');
+      errorState.className = 'col-12 text-center py-5';
+      errorState.textContent = 'Business listings are unavailable right now. Please try again later.';
+      directory.replaceChildren(errorState);
     });
 }

@@ -6,7 +6,7 @@ This folder is a static-only version of the site intended for GitHub Pages deplo
 - HTML pages
 - CSS styling
 - JavaScript front-end behavior
-- Local JSON data for the businesses directory
+- Sample business JSON retained for reference (not displayed)
 
 ## Not included
 - PHP backend
@@ -30,7 +30,7 @@ The site is static, so the Supabase SDK is loaded as a browser ES module from `e
 
 Google OAuth buttons on the login, user signup, and entrepreneur signup pages return to `login.html`. In **Supabase > Authentication > URL Configuration**, allow `https://bigwrapes.github.io/Bigwerapes-pixel/login.html` as a redirect URL. For local testing, also allow the exact local callback URL, such as `http://127.0.0.1:8765/login.html`. Enable Google under **Authentication > Providers** and configure its Client ID and Client Secret there; never put the Google Client Secret in browser code. In Google Cloud Console, add the Supabase project's callback URL, `https://ohgzwgeitxigiunxptla.supabase.co/auth/v1/callback`, as an authorized redirect URI. First-time OAuth users complete any missing profile fields after returning to `login.html`; the signup page they started from supplies the user or entrepreneur account type.
 
-New submitted businesses are stored in Supabase and shown alongside the existing manually maintained entries in `assets/data/businesses.json`. The submission form saves the owner's public name, avatar URL, and bio in `business_owner_public_profiles`; public owner cards link to `owner-profile.html?owner_id=...`, which loads that profile and its businesses. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
+New submitted businesses are stored in Supabase and are the only listings shown in the public directory and business profiles. The sample entries in `assets/data/businesses.json` remain in the repository for reference, but their directory loader and profile fallback are disabled. The submission form saves the owner's public name, avatar URL, and bio in `business_owner_public_profiles`; public owner cards link to `owner-profile.html?owner_id=...`, which loads that profile and its businesses. Each business has one cover image and up to 15 product images. Owners can add photos later and delete a specific product photo from the signed-in business page. The product-image migration enforces the 15-photo maximum in SQL as well as in the browser. The `businesses` table and product photos are publicly readable, while business edits and product-image changes are limited by Supabase policies to the authenticated owner.
 
 Regular user accounts keep the existing `student` value in `profiles.account_type` for compatibility, but are labeled **User** in the signup flow and are directed to the business directory after sign-in. Entrepreneur accounts are directed to the business management page, which checks the signed-in user's profile account type before loading dashboard functionality.
 
@@ -132,42 +132,8 @@ Before deploying, inspect the **live** Supabase project rather than assuming the
 3. Select the root branch or docs folder as the publishing source.
 4. Publish and visit the GitHub Pages URL.
 
-## Manual business editing
-To add or update business cards, edit the file at `assets/data/businesses.json`.
-
-The file is a JSON array. Add a comma after the current last business object, then paste a new object before the closing `]`. Replace the example values with the real business details. Use an unused numeric `id` and a unique lowercase `business_slug`.
-
-```json
-{
-  "id": 4,
-  "business_name": "Your Business Name",
-  "business_slug": "your-business-name",
-  "description": "Describe the products or services this student business offers.",
-  "category": "Digital Services",
-  "logo_url": "assets/img/portfolio/portfolio-3.webp",
-  "cover_image_url": "assets/img/about/wall45.jpg",
-  "owner_name": "Student Owner",
-  "owner_avatar_url": "assets/img/person/person-1.jpg",
-  "owner_bio": "A short introduction to the student business owner.",
-  "phone": "+234 800 000 0000",
-  "whatsapp_number": "+2348000000000",
-  "whatsapp_link": "https://wa.me/2348000000000",
-  "email": "owner@example.com",
-  "website_url": "https://example.com",
-  "location": "Abuja, Nigeria",
-  "rating": 0,
-  "review_count": 0,
-  "is_verified": false,
-  "portfolio": [
-    {
-      "title": "Product or Service One",
-      "image": "assets/img/portfolio/portfolio-1.webp"
-    }
-  ]
-}
-```
-
-Keep the surrounding square brackets and put commas between objects, but not after the final object. The example above is a template only; it will appear on the site only after you add the object to `assets/data/businesses.json`. New accounts submitted through the signed-in form are stored in Supabase instead of this local file.
+## Business listings
+Only listings saved in Supabase are loaded by the public directory and business profiles. Add listings through the signed-in entrepreneur form. The sample entries in `assets/data/businesses.json` are not used by the site.
 
 ## Important note
 This static version is meant to keep the website visible online without the paid hosting/database requirement. Any feature that depends on server-side logic will need a future backend or external API service.

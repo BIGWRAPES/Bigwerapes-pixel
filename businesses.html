@@ -35,6 +35,7 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/businesses.css" rel="stylesheet">
 </head>
 
 <body class="businesses-page">
@@ -79,20 +80,27 @@
         <p>Explore diverse businesses run by creative student entrepreneurs in different categories</p>
       </div><!-- End Section Title -->
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+      <div class="container directory-cta" data-aos="fade-up">
+        <a href="business-submit.html" class="btn btn-primary directory-cta-button">
+          <i class="bi bi-envelope" aria-hidden="true"></i>
+          <span>List a Business</span>
+        </a>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-          <div class="search-panel" style="flex: 1 1 360px; max-width: 540px;">
+      <div class="container directory-container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="directory-toolbar">
+          <div class="search-panel directory-search">
             <label for="directorySearchInput" class="visually-hidden">Search businesses and products</label>
-            <div class="input-group" style="max-width: 540px;">
+            <div class="input-group">
               <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
               <input id="directorySearchInput" type="search" class="form-control" placeholder="Search businesses, products, or categories" aria-label="Search businesses and products">
               <button id="directorySearchButton" type="button" class="btn btn-primary">Search</button>
             </div>
-            <p id="directorySearchStatus" class="form-text text-light mt-2" style="min-height: 1.5em; margin-bottom: 0;">Search businesses and products.</p>
+            <p id="directorySearchStatus" class="form-text directory-search-status" aria-live="polite">Search businesses and products.</p>
           </div>
-          <div class="portfolio-filters-wrapper" data-aos="fade-up" data-aos-delay="100">
-            <ul class="portfolio-filters isotope-filters">
+          <div class="portfolio-filters-wrapper directory-filters-wrapper" data-aos="fade-up" data-aos-delay="100">
+            <ul class="portfolio-filters isotope-filters" aria-label="Filter businesses by category">
               <li data-filter="*" class="filter-active">All Businesses</li>
               <li data-filter=".filter-branding">Fashion & Accessories</li>
               <li data-filter=".filter-web">Digital Services</li>
@@ -100,18 +108,15 @@
               <li data-filter=".filter-motion">Photography & Media</li>
             </ul>
           </div>
-          <a href="business-submit.html" style="background-color: var(--accent-color, #008870); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: none; cursor: pointer;"
-             onmouseover="this.style.backgroundColor='#006b54'; this.style.transform='translateY(-2px)';" 
-             onmouseout="this.style.backgroundColor='var(--accent-color, #008870)'; this.style.transform='translateY(0)';">
-            <i class="bi bi-envelope"></i>
-            <span>List a Business</span>
-          </a>
         </div>
 
         <div class="isotope-layout" data-default-filter="*" data-layout="fitRows" data-sort="original-order">
 
-          <div class="row gy-3 gx-3 portfolio-grid isotope-container" data-aos="fade-up" data-aos-delay="200">
-            <!-- Businesses loaded dynamically via API -->
+          <div class="row gy-3 gx-3 portfolio-grid isotope-container" data-aos="fade-up" data-aos-delay="200" aria-live="polite">
+            <div class="col-12 directory-loading" role="status">
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+              <span>Loading businesses…</span>
+            </div>
           </div><!-- End Portfolio Grid -->
 
         </div>
@@ -198,8 +203,8 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-  <!-- Static Businesses Directory Script -->
-  <script src="assets/js/static-businesses.js"></script>
+  <!-- Demo businesses from assets/data/businesses.json are intentionally disabled. -->
+  <!-- <script src="assets/js/static-businesses.js"></script> -->
   <script type="module" src="assets/js/supabase-client.js"></script>
   <script type="module" src="assets/js/supabase-directory.js"></script>
 

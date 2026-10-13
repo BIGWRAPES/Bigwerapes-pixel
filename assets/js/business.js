@@ -330,14 +330,16 @@ async function loadBusiness() {
     queryError = error;
   }
 
-  const response = await fetch('assets/data/businesses.json');
-  if (!response.ok) throw queryError || new Error('Unable to load this business profile.');
-  const businesses = await response.json();
-  const business = businesses.find((item) => item.business_slug === slug);
-  if (business) {
-    renderBusiness(business, null, slug);
-    return;
-  }
+  // Static demo businesses are disabled. Only businesses published in Supabase
+  // should be shown on public business profile pages.
+  // const response = await fetch('assets/data/businesses.json');
+  // if (!response.ok) throw queryError || new Error('Unable to load this business profile.');
+  // const businesses = await response.json();
+  // const business = businesses.find((item) => item.business_slug === slug);
+  // if (business) {
+  //   renderBusiness(business, null, slug);
+  //   return;
+  // }
   if (queryError) throw queryError;
   throw new Error('This business profile could not be found.');
 }
