@@ -2102,8 +2102,11 @@ section,
 # Team Section
 --------------------------------------------------------------*/
 .team .team-member {
+  display: block;
   position: relative;
   background-color: var(--surface-color);
+  color: inherit;
+  text-decoration: none;
   border-radius: 20px;
   overflow: hidden;
   transition: 0.4s;
