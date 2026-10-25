@@ -123,8 +123,14 @@
                 <a href="businesses.html" class="btn btn-primary">Explore Businesses</a>
                 <a href="business-submit.html" class="btn btn-outline">
                   <i class="bi bi-envelope"></i>
-                  Get Started
+                  List Your Business
                 </a>
+              </div>
+
+              <div id="homepage-business-preview" class="homepage-business-preview" aria-labelledby="homepage-business-preview-title" aria-busy="true">
+                <h2 id="homepage-business-preview-title">See what students are building</h2>
+                <p class="homepage-business-preview-status" role="status" aria-live="polite">Loading recent listings…</p>
+                <div class="homepage-business-preview-grid"></div>
               </div>
             </div>
           </div>
@@ -148,35 +154,52 @@
                 <div class="stat-icon">
                   <i class="bi bi-star"></i>
                 </div>
-                <h2><span data-homepage-stat="businesses">0</span>+</h2>
-                <p>Student Businesses</p>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <i class="bi bi-people"></i>
-                </div>
-                <h2><span>100</span>+</h2>
-                <p>Active Customers</p>
+                <h2><span data-homepage-stat="businesses" aria-live="polite">—</span></h2>
+                <p>Listed Businesses</p>
               </div>
               <div class="stat-item">
                 <div class="stat-icon">
                   <i class="bi bi-heart"></i>
                 </div>
-                <h2><span data-homepage-stat="reviews">0</span>+</h2>
+                <h2><span data-homepage-stat="reviews" aria-live="polite">—</span></h2>
                 <p>Customer Reviews</p>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon">
-                  <i class="bi bi-globe"></i>
-                </div>
-                <h2><span>1</span></h2>
-                <p>Growing Platform</p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section><!-- /Hero Section -->
+
+    <section id="how-it-works" class="how-it-works section" aria-labelledby="how-it-works-title">
+      <div class="container section-title" data-aos="fade-up">
+        <span class="description-title">Simple connections</span>
+        <h2 id="how-it-works-title">How it works</h2>
+        <p>Find a student business and connect directly with the person behind it.</p>
+      </div>
+
+      <div class="container">
+        <div class="how-it-works-grid">
+          <article class="how-it-works-step" data-aos="fade-up">
+            <span class="how-it-works-number" aria-hidden="true">01</span>
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <h3>Discover</h3>
+            <p>Browse the directory to find student businesses, products, and services.</p>
+          </article>
+          <article class="how-it-works-step" data-aos="fade-up" data-aos-delay="100">
+            <span class="how-it-works-number" aria-hidden="true">02</span>
+            <i class="bi bi-chat-dots" aria-hidden="true"></i>
+            <h3>Contact</h3>
+            <p>Reach out to a business owner using the contact details on their listing.</p>
+          </article>
+          <article class="how-it-works-step" data-aos="fade-up" data-aos-delay="200">
+            <span class="how-it-works-number" aria-hidden="true">03</span>
+            <i class="bi bi-bag-check" aria-hidden="true"></i>
+            <h3>Arrange directly</h3>
+            <p>Confirm availability, payment, delivery, or booking directly with the business.</p>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <!-- Sponsors Section -->
     <section id="sponsors" class="sponsors section" aria-labelledby="sponsors-heading">
@@ -191,7 +214,8 @@
             <img src="assets/img/sponsors/merit-time-international.jpg" alt="Merit Time International">
           </a>
           <h2>Want to partner with us?</h2>
-          <p>Link to our contact page to discuss partnership opportunities and how we can collaborate to support student entrepreneurs.</p>
+          <p>Discuss partnership opportunities and how we can collaborate to support student entrepreneurs.</p>
+          <a href="contact.html" class="btn btn-primary">Partner with us</a>
         </div>
       </div>
     </section><!-- /Sponsors Section -->
@@ -199,59 +223,24 @@
     <!-- Team Section -->
     <section id="team" class="team section">
 
-      <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <span class="description-title">Our Team</span>
-        <h2>Meet Our Team</h2>
-        <p>Dedicated to supporting student entrepreneurs in achieving their business goals</p>
-      </div><!-- End Section Title -->
+        <span class="description-title">Our mission</span>
+        <h2>Built to support student entrepreneurs</h2>
+        <p>BigWrapes Pixel helps student businesses get discovered and connect with customers.</p>
+      </div>
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-4">
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="row justify-content-center">
+          <div class="col-lg-7 col-md-9">
             <a class="team-member" href="https://wrapes-code.onrender.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Okwu Prosper's portfolio">
               <div class="member-info">
                 <h3>Okwu Prosper</h3>
                 <span>Senior Developer</span>
-                <p>Leading technical innovation to support student entrepreneurs. Passionate about building scalable solutions for the Bigwrapes-Pixel platform.</p>
+                <p>Leading technical innovation to support student entrepreneurs and build the BigWrapes Pixel platform.</p>
               </div>
-            </a><!-- End Team Member -->
+            </a>
           </div>
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <a class="team-member" href="https://wrapes-code.onrender.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Okwu Prosper's portfolio">
-              <div class="member-info">
-                <h3>Okwu Prosper</h3>
-                <span>Creative Director</span>
-                <p>Designing exceptional user experiences that empower students to succeed. Focused on making Bigwrapes-Pixel intuitive and engaging for all users.</p>
-              </div>
-            </a><!-- End Team Member -->
-          </div>
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-            <a class="team-member" href="https://wrapes-code.onrender.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Okwu Prosper's portfolio">
-              <div class="member-info">
-                <h3>Okwu Prosper</h3>
-                <span>Project Manager</span>
-                <p>.</p>
-              </div>
-            </a><!-- End Team Member -->
-          </div>
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-            <a class="team-member" href="https://wrapes-code.onrender.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit Okwu Prosper's portfolio">
-              <div class="member-info">
-                <h3>Okwu Prosper</h3>
-                <span>Software Engineer</span>
-                <p>Building robust and secure systems for the platform. Ensuring student data is protected and the site runs smoothly for all users.</p>
-              </div>
-            </a><!-- End Team Member -->
-          </div>
-
         </div>
-
       </div>
 
     </section><!-- /Team Section -->
@@ -278,8 +267,8 @@
           <div>
             <h4>Contact</h4>
             <p>
-              <strong>Phone:</strong> <span>09138759944</span><br>
-              <strong>Email:</strong> <span>okwup910@gmail.com</span><br>
+              <strong>Phone:</strong> <a href="tel:+2349138759944">09138759944</a><br>
+              <strong>Email:</strong> <a href="mailto:okwup910@gmail.com">okwup910@gmail.com</a><br>
             </p>
           </div>
         </div>

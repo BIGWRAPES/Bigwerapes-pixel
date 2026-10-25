@@ -11,9 +11,60 @@ function getPublicStorageUrl(supabase, path) {
   return data.publicUrl;
 }
 
-function appendBusinessCard(business, imageUrl) {
+let directoryListings = [];
+let activeDirectoryFilter = '*';
+
+function applyDirectoryFilter() {
+  if (!directory) return;
+  const categoryClass = activeDirectoryFilter.slice(1);
+  directory.querySelectorAll('.portfolio-item').forEach((item) => {
+    item.hidden = activeDirectoryFilter !== '*' && !item.classList.contains(categoryClass);
+  });
+}
+
+document.querySelectorAll('.directory-filters-wrapper .portfolio-filters li').forEach((filter) => {
+  const selectFilter = () => {
+    activeDirectoryFilter = filter.dataset.filter || '*';
+    document.querySelectorAll('.directory-filters-wrapper .portfolio-filters li').forEach((option) => {
+      const isActive = option === filter;
+      option.classList.toggle('filter-active', isActive);
+      option.setAttribute('aria-pressed', String(isActive));
+    });
+    applyDirectoryFilter();
+  };
+
+  filter.setAttribute('role', 'button');
+  filter.setAttribute('aria-pressed', String(filter.classList.contains('filter-active')));
+  filter.addEventListener('click', selectFilter);
+  filter.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectFilter();
+    }
+  });
+});
+
+function categoryFilterClass(category) {
+  const normalizedCategory = (category || '').trim().toLowerCase();
+  if (normalizedCategory.includes('digital') || normalizedCategory === 'technology') return 'filter-web';
+  if (normalizedCategory.includes('craft') || normalizedCategory === 'education' || normalizedCategory === 'consulting') return 'filter-print';
+  if (normalizedCategory.includes('photo') || normalizedCategory.includes('media')) return 'filter-motion';
+  return 'filter-branding';
+}
+
+function refreshDirectoryLayout() {
+  applyDirectoryFilter();
+}
+
+function replaceDirectoryChildren(children) {
+  const fragment = document.createDocumentFragment();
+  children.forEach((child) => fragment.append(child));
+  directory.replaceChildren(fragment);
+}
+
+function createBusinessCard(business, imageUrl) {
   const column = document.createElement('div');
-  column.className = 'col-6 col-md-4 col-xl-3 portfolio-item isotope-item';
+  column.className = `col-6 col-md-4 col-xl-3 portfolio-item isotope-item ${categoryFilterClass(business.category)}`;
 
   const card = document.createElement('article');
   card.className = 'portfolio-card';
@@ -77,13 +128,13 @@ function appendBusinessCard(business, imageUrl) {
   }
   card.append(imageContainer, content);
   column.append(card);
-  directory.append(column);
+  return column;
 }
 
 function createSearchResultCard(row, supabase) {
   const isProductResult = row.result_type === 'product';
   const container = document.createElement('div');
-  container.className = 'col-6 col-md-4 col-xl-3 portfolio-item isotope-item';
+  container.className = `col-6 col-md-4 col-xl-3 portfolio-item isotope-item ${categoryFilterClass(row.category)}`;
 
   const card = document.createElement('article');
   card.className = 'portfolio-card';
@@ -152,6 +203,8 @@ async function runDirectorySearch() {
 
   const term = searchInput.value.trim();
   if (!term) {
+    replaceDirectoryChildren(directoryListings);
+    refreshDirectoryLayout();
     searchStatus.textContent = 'Search businesses and products.';
     return;
   }
@@ -171,6 +224,7 @@ async function runDirectorySearch() {
 
   const results = Array.isArray(data) ? data : [];
   directory.innerHTML = '';
+  refreshDirectoryLayout();
 
   if (!results.length) {
     directory.innerHTML = `
@@ -187,6 +241,7 @@ async function runDirectorySearch() {
     const searchCard = createSearchResultCard(row, supabase);
     if (searchCard) directory.append(searchCard);
   });
+  refreshDirectoryLayout();
 
   searchStatus.textContent = `Showing ${results.length} match${results.length === 1 ? '' : 'es'} for “${term}”.`;
 }
@@ -229,7 +284,7 @@ if (directory) {
             if (profileError) throw profileError;
             const profilesByOwnerId = new Map(ownerProfiles.map((profile) => [profile.owner_id, profile]));
 
-            data.forEach((business) => {
+            directoryListings = data.map((business) => {
               const imageUrl = business.image_path
                 ? supabase.storage.from('business-images').getPublicUrl(business.image_path).data.publicUrl
                 : '';
@@ -237,8 +292,10 @@ if (directory) {
               business.business_product_images = (business.business_product_images || []).map((photo) => ({
                 publicUrl: supabase.storage.from('business-images').getPublicUrl(photo.image_path).data.publicUrl
               }));
-              appendBusinessCard(business, imageUrl);
+              return createBusinessCard(business, imageUrl);
             });
+            replaceDirectoryChildren(directoryListings);
+            refreshDirectoryLayout();
           });
       });
     })

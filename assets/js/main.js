@@ -105,11 +105,6 @@
   });
 
   /**
-   * Initiate Pure Counter
-   */
-  new PureCounter();
-
-  /**
    * Init swiper sliders
    */
   function initSwiper() {
@@ -132,6 +127,10 @@
    * Init isotope layout and filters
    */
   document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
+    // The business directory applies category filters to asynchronously loaded
+    // cards itself; Isotope initializes before those cards exist.
+    if (isotopeItem.closest('.businesses-page')) return;
+
     let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
     let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
     let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
